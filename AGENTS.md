@@ -225,19 +225,17 @@ This means:
 
 - stable `featureId`, `conceptId`, and `ruleId`,
 - stable support status,
-- stable JSON field names,
+- stable report section labels and field labels,
 - stable sorting of arrays,
 - stable ordering of features, concepts, matched parameters, missing requirements, and evidence entries.
 
-Sort JSON arrays by stable IDs or paths unless a stronger domain-specific ordering already exists.
+Sort repeated report entries (features, missing requirements, and evidence) by stable IDs or paths unless a stronger domain-specific ordering already exists.
 
 If numeric scores, ratios, percentages, or confidence values are emitted, use a fixed documented precision and rounding mode so output remains stable.
 
-## Output schema versioning
+## Output report format versioning
 
-The top-level JSON report must include a single `schemaVersion` field.
-
-Do not repeat `schemaVersion` inside each feature object.
+The top-level text report must include a single `reportFormatVersion` value in the report header.
 
 Stable IDs are required:
 
@@ -247,17 +245,17 @@ Stable IDs are required:
 
 IDs must be deterministic and should not depend on display labels.
 
-If the schema changes incompatibly, update the top-level `schemaVersion` and document the migration impact in the PR.
+If the report format changes incompatibly, update `reportFormatVersion` and document the migration impact in the PR.
 
 ## Output requirements
 
-The primary output must be structured JSON.
+The primary output must be structured plain text.
 
-Optional human-readable Markdown or text output may be added, but JSON is required.
+Optional machine-readable JSON may be produced as a secondary artifact, but plain text is required.
 
 The report must include:
 
-- `schemaVersion`
+- `reportFormatVersion`
 - device identification,
 - detected data model,
 - repository commit/version metadata where practical,
@@ -274,83 +272,19 @@ The report must include:
 - source-code references used to derive requirements,
 - evidence confidence.
 
+For each feature with status `unsupported`, the text report must include a dedicated `Missing for support` block that explicitly lists what is missing and why that blocks support.
+
 Summary count fields must be disjoint. `implementationNotFoundFeatures` must not be included in `unknownFeatures`.
 
-Conceptual structure:
+Terminal output may use ANSI colors while remaining plain text:
 
-```json
-{
-  "schemaVersion": "1.0.0",
-  "assessmentBasis": "staticDataModelSnapshot",
-  "repositoryMetadata": {
-    "hostRepository": "prisme-backend",
-    "commit": "abc123",
-    "timestampUtc": "2026-05-06T10:00:00Z"
-  },
-  "device": {
-    "vendor": "ExampleVendor",
-    "model": "ExampleModel",
-    "firmwareVersion": "1.2.3",
-    "declaredDataModel": "TR-181",
-    "detectedDataModel": "TR-181"
-  },
-  "summary": {
-    "overallSupport": "partial",
-    "supportedFeatures": 1,
-    "partialFeatures": 1,
-    "unsupportedFeatures": 1,
-    "unknownFeatures": 1,
-    "implementationNotFoundFeatures": 0
-  },
-  "features": [
-    {
-      "featureId": "wifi.selfHealing.remoteChannelManagement",
-      "featureName": "Remote Channel Management",
-      "category": "SelfHealing",
-      "support": "partial",
-      "evidenceConfidence": "high",
-      "runtimeValidationRequired": true,
-      "dataModelSupport": "supported",
-      "telemetrySupport": "partial",
-      "controlSupport": "unsupported",
-      "matchedRequirements": [
-        {
-          "ruleId": "wifi.selfHealing.remoteChannelManagement.channel.read",
-          "conceptId": "wifi.radio.channel.current",
-          "matchedPaths": [
-            "Device.WiFi.Radio.1.Channel"
-          ],
-          "access": "read"
-        }
-      ],
-      "missingMandatoryRequirements": [
-        {
-          "ruleId": "wifi.selfHealing.remoteChannelManagement.channel.write",
-          "conceptId": "wifi.radio.channel.current",
-          "requiredAccess": "write",
-          "candidatePaths": [
-            "Device.WiFi.Radio.{i}.Channel"
-          ],
-          "impact": "Algorithm may recommend channel changes but cannot apply them automatically"
-        }
-      ],
-      "missingOptionalRequirements": [],
-      "limitations": [
-        "Offline snapshot cannot prove that values are populated correctly at runtime"
-      ],
-      "sourceCodeReferences": [
-        {
-          "file": "relative/path/to/file.ext",
-          "lineStart": 10,
-          "lineEnd": 42,
-          "symbol": "RemoteChannelManagementService",
-          "proves": "Reads current Wi-Fi radio channel and attempts channel update"
-        }
-      ]
-    }
-  ]
-}
-```
+- green: `supported`
+- yellow: `partial`
+- red: `unsupported`
+- cyan: `unknown`
+- magenta: `implementation_not_found`
+
+Color behavior should support `--color=always|auto|never` and default to `auto`.
 
 ## Artifact locations
 
@@ -365,11 +299,11 @@ Documentation:
 Committed example inputs/outputs:
 
 - `docs/offline-analyzer/examples/input-tr181-basic.json`
-- `docs/offline-analyzer/examples/output-compatibility-report.json`
+- `docs/offline-analyzer/examples/output-compatibility-report.txt`
 
 Local generated output:
 
-- `out/compatibility-report.json`
+- `out/compatibility-report.txt`
 
 The `out/` directory is a local/dev artifact location and must be gitignored. Do not commit generated `out/` reports.
 
@@ -411,41 +345,14 @@ The analyzer must use only:
 
 ## Input requirements
 
-The analyzer must accept a static CPE data model snapshot.
+The analyzer must accept a static CPE data model snapshot in one supported input format.
 
-Support at least these cases if compatible with existing repository conventions:
+Supported input format:
 
-- TR-181 path snapshots,
-- TR-098 path snapshots,
-- vendor-specific extension paths,
-- presence-only snapshots,
-- snapshots with values,
-- snapshots with parameter metadata such as type, readability, writability, object instances, diagnostics, and collection frequency if available.
+- JSON
+- top-level `Report` array with TR-181-style path/value pairs (for example `Device.WiFi.Radio.1.Channel`)
 
-If an existing snapshot format already exists in source code, prefer reusing or extending it.
-
-If no suitable format exists, define a minimal JSON format.
-
-Conceptual example:
-
-```json
-{
-  "device": {
-    "vendor": "ExampleVendor",
-    "model": "ExampleModel",
-    "firmwareVersion": "1.2.3",
-    "declaredDataModel": "TR-181"
-  },
-  "parameters": {
-    "Device.WiFi.Radio.1.Channel": {
-      "value": "6",
-      "type": "unsignedInt",
-      "readable": true,
-      "writable": true
-    }
-  }
-}
-```
+No alternative input formats are supported at this time.
 
 ## Normative feature assessment rules
 
@@ -576,7 +483,7 @@ After the investigation report, implement the first working version focused on:
 3. Building the raw parameter mapping layer.
 4. Building the feature requirement registry.
 5. Evaluating support status for the capped initial feature set.
-6. Producing a JSON report.
+6. Producing a plain-text report.
 7. Adding tests.
 
 Prefer small, reviewable commits or implementation steps.
@@ -607,7 +514,7 @@ Required command categories:
 - lint/static analysis if available,
 - unit tests for the analyzer,
 - targeted existing tests around Discovery Program, scoring, self-healing, or data model handling,
-- sample analyzer command that writes `out/compatibility-report.json`.
+- sample analyzer command that writes `out/compatibility-report.txt`.
 
 Codex must discover the exact commands from the chosen host repository.
 
@@ -622,8 +529,8 @@ If full tests are too heavy, unavailable, or blocked:
 Phase 1 minimum expected local command behavior:
 
 - run analyzer against a committed example snapshot,
-- produce `out/compatibility-report.json`,
-- validate that JSON contains top-level `schemaVersion`,
+- produce `out/compatibility-report.txt`,
+- validate that the text report header contains `reportFormatVersion`,
 - validate deterministic stable IDs for assessed features.
 
 ## Performance guardrail
@@ -648,7 +555,7 @@ Add or update tests for:
 - vendor-specific extension path if supported by existing code,
 - empty/minimal snapshot,
 - deterministic output ordering,
-- schema version presence,
+- report format version presence,
 - existing Discovery Program fixtures if available.
 
 Run the relevant test suite before finishing.
@@ -685,20 +592,20 @@ Minimum deliverables:
 - analyzer module in the chosen host repository,
 - input snapshot loader,
 - data model detection,
-- top-level output schema with `schemaVersion`,
+- top-level text report header with `reportFormatVersion`,
 - stable IDs: `featureId`, `conceptId`, `ruleId`,
 - initial capped feature requirement registry,
-- JSON report generation,
+- plain-text report generation,
 - tests for the initial feature set,
 - example input under `docs/offline-analyzer/examples/`,
 - committed example output under `docs/offline-analyzer/examples/`,
-- local generated output path `out/compatibility-report.json`,
+- local generated output path `out/compatibility-report.txt`,
 - documentation for how to run the analyzer.
 
 Phase 1 is done when:
 
 - the analyzer runs offline against an example snapshot,
-- `out/compatibility-report.json` is produced locally,
+- `out/compatibility-report.txt` is produced locally,
 - output ordering is deterministic,
 - every assessed feature has evidence,
 - targeted tests pass or skipped tests are documented,
