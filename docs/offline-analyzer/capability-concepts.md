@@ -7,8 +7,9 @@ This document defines canonical capability concept candidates for the Offline PR
 Current coverage:
 
 - Milestone 1: Discovery Program concepts only.
+- Milestone 2: QoE score derived metric concepts from active score calculation code.
 
-Later milestones will extend this file with score, self-healing, customer-care, topology, and diagnostics concepts.
+Later milestones will extend this file with self-healing, customer-care, topology, and diagnostics concepts.
 
 This document does not define the final raw TR-181/TR-098/vendor path mapping table. Source-code paths may appear only as evidence examples for existing PRISME behavior.
 
@@ -339,11 +340,217 @@ Confidence:
 - `prisme-backend/services/discovery-program/src/comm_interface/qoe_agent/qoe_agent.py:122` retrieves QoE Agent API output.
 - Notes: This is not a TR-181/TR-098 data model path concept. It is a runtime agent/API capability.
 
+## QoE Score Concepts
+
+These concepts describe source-code-confirmed score calculation inputs and outputs as derived metrics. They are not final raw data-model parameter mappings.
+
+### `score.qoe.metricHistory`
+
+- Name: QoE metric history
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: Memo-backed metric history used by QoE score aggregation to calculate medians, last values, and weighted means.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:675` reads WAN download history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:698` reads WAN upload history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:739` reads DSL downstream current-rate last value.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/download/qoe_download_total_kbps.js:99` stores WAN download history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/upload/qoe_upload_total_kbps.js:127` stores WAN upload history.
+- Notes: Offline static snapshots can only infer whether source inputs for these histories may exist. They cannot prove enough runtime history exists.
+
+### `score.qoe.historyWindowFreshness`
+
+- Name: QoE history window freshness
+- Category: Score
+- Concept type: `ruleEvaluation`
+- Confidence: `high`
+- Description: Median-based scores require median timestamps within the default metric history window.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:602` defines median freshness validation.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:606` rejects medians older than `DEFAULT_METRIC_HISTORY_WINDOW`.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:617` returns null when a band-specific median is missing or stale.
+- Notes: This is runtime/history evidence. A single input JSON snapshot cannot fully validate this concept.
+
+### `score.qoe.zeroMeansNotAvailable`
+
+- Name: QoE zero-as-not-available fallback
+- Category: Score
+- Concept type: `ruleEvaluation`
+- Confidence: `high`
+- Description: Score value `0` is treated as missing/not available by score composition helpers and is not emitted as an output score.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1081` defines score output helper.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1082` emits only scores greater than zero.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1161` documents min-score composition while ignoring `0`.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1165` implements `score_min_ignore_na`.
+- Notes: Analyzer output should distinguish missing support from a calculated zero/no-output score.
+
+### `score.cpe.overall`
+
+- Name: CPE overall QoE score
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: Overall CPE score derived from CPE Wi-Fi score and CPE Internet score using zero-as-not-available minimum composition.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:825` composes Internet score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:828` composes CPE score from Wi-Fi and Internet scores.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:834` emits `qoe_cpe_score`.
+- Notes: Full runtime support depends on the child score concepts and their history inputs.
+
+### `score.cpe.wifi`
+
+- Name: CPE Wi-Fi QoE score
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: CPE Wi-Fi score derived from Wi-Fi traffic, coverage, and network interference subscores.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:167` calculates CPE Wi-Fi network interference.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:168` calculates CPE Wi-Fi score with the truth table.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:439` derives weighted CPE Wi-Fi coverage.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:444` derives weighted CPE Wi-Fi traffic.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1196` implements CPE Wi-Fi truth-table composition.
+- Notes: If more than one of traffic, coverage, and interference is missing, the current implementation returns no CPE Wi-Fi score.
+
+### `score.host.wifi`
+
+- Name: Host Wi-Fi QoE score
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: Per-host Wi-Fi score derived from host Wi-Fi coverage and traffic subscores.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:382` derives host Wi-Fi coverage.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:388` derives host Wi-Fi traffic.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:394` calculates host Wi-Fi score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:397` maps host score to host Wi-Fi score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1232` implements host Wi-Fi truth-table composition.
+- Notes: Host score currently follows host Wi-Fi score in this aggregation path.
+
+### `score.wifi.coverage`
+
+- Name: Wi-Fi coverage score
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: Coverage subscore derived from RSSI/signal-strength score and PHY/downlink-rate score.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:382` composes host coverage from RSSI and PHY-rate scores.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:439` composes CPE coverage from weighted RSSI and PHY-rate scores.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_ap_X_instance_X_signal_strength.js:34` stores per-host signal-strength history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_ap_X_instance_X_host_last_data_downlink_rate_kbps.js:75` stores per-host downlink-rate history.
+- Notes: The analyzer should treat this as a derived score concept, not as one raw parameter.
+
+### `score.wifi.traffic`
+
+- Name: Wi-Fi traffic score
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: Wi-Fi traffic subscore currently follows error-rate scoring.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:388` maps host traffic to host error-rates score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:444` maps CPE traffic to weighted CPE error-rates score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_ap_X_instance_X_stats_error_rate.js:134` stores host sent-error-rate history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_ap_X_instance_X_stats_error_rate.js:153` stores host received-error-rate history.
+- Notes: Latency appears in comments/history support but is not used by the current traffic-score calculation path documented here.
+
+### `score.wifi.interference`
+
+- Name: Wi-Fi network interference score
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: CPE Wi-Fi network interference score derived from noise score and channel-utilization score.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:165` calculates CPE Wi-Fi noise score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:166` calculates CPE Wi-Fi channel-utilization score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:167` composes network interference score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_wifi_radio_X_instance_X_stats_noise.js:23` stores band-specific noise history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_data_elements_radio.js:68` stores band-specific utilization history.
+- Notes: A static snapshot cannot prove median freshness or adequate per-band history.
+
+### `score.cpe.internet`
+
+- Name: CPE Internet QoE score
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: CPE Internet score derived from Internet performance, Internet latency, and WAN access scores.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:162` calculates Internet latency score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:178` calculates Internet performance score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:825` composes Internet score from performance and latency.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:826` composes WAN access into Internet score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:844` emits `qoe_cpe_internet_score`.
+- Notes: The source also emits Internet quality/resolution components, but the main Internet score path uses performance, latency, and WAN access.
+
+### `score.internet.performance`
+
+- Name: Internet performance score
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: Internet performance score derived from download and upload speed scores.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:175` calculates CPE Internet download score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:176` calculates CPE Internet upload score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:178` composes performance from download and upload scores.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:672` defines download score calculation.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:695` defines upload score calculation.
+- Notes: Contract download/upload enrichment values are used when present; otherwise the code falls back to `250`.
+
+### `score.internet.latency`
+
+- Name: Internet latency score
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: Internet latency score derived from WAN ping average response time and packet-loss histories.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:642` defines Internet latency score calculation.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:647` reads ping average-response-time history and last value.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:649` reads packet-loss history and last value.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/ipping/qoe_wan_ping_averageresponsetime_ms.js:140` stores ping average-response-time history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/ipping/qoe_wan_ping_packetLoss.js:154` stores packet-loss history.
+- Notes: This requires runtime diagnostic/history evidence, not only static path presence.
+
+### `score.wan.access`
+
+- Name: WAN access score
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `medium`
+- Description: WAN access score composed from Ethernet, DSL, GPON, or L2TP branch scores selected by WAN access type.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:769` reads WAN access type.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:770` selects WAN access scoring branch.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:779` implements Ethernet scoring.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:804` leaves xDSL standard scoring as TBD.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:808` reads GPON inputs but leaves GPON scoring as TBD.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:814` leaves L2TP scoring as TBD.
+- Notes: Confidence is medium because only parts of WAN access scoring are implemented. TBD branches must not be treated as full support.
+
+### `score.daily.rollup`
+
+- Name: Daily score rollup
+- Category: Score
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: Daily score rollups calculated from stored score history medians.
+- Source-code evidence:
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:911` starts daily device-score calculation.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:938` reads daily CPE Wi-Fi history medians.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1022` starts daily host-score calculation.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1038` reads daily host Wi-Fi history medians.
+- Notes: Daily rollups are history-dependent and cannot be proven from a single static input snapshot.
+
 ## Deferred Concept Areas
 
-The following concept groups are not covered in Milestone 1 and will be added in later milestones:
+The following concept groups are not covered yet and will be added in later milestones:
 
-- QoE score derived metric concepts.
 - Self-healing telemetry and control concepts.
 - Customer-care Wi-Fi management concepts.
 - Topology/map visibility concepts.
