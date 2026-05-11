@@ -8,8 +8,9 @@ Current coverage:
 
 - Milestone 1: Discovery Program features only.
 - Milestone 2: QoE score calculation features from active aggregation code.
+- Milestone 3: Self-healing workflows and control actions.
 
-Later milestones will extend this draft with self-healing, customer-care, topology, and diagnostics features from `docs/offline-analyzer/feature-inventory.md`.
+Later milestones will extend this draft with customer-care, topology, and diagnostics features from `docs/offline-analyzer/feature-inventory.md`.
 
 This is not the final support-rule registry. It does not claim whether a specific device snapshot is supported, partial, unsupported, or unknown.
 
@@ -480,6 +481,285 @@ Open questions:
 - Static analysis must report incomplete WAN access branches as partial or unknown depending on the selected access type and available source evidence.
 - The next mapping step must decide how much runtime diagnostic history can be inferred from the supported JSON input format.
 
+### `selfHealing.remoteChannelManagement`
+
+- Feature name: Remote Channel Management self-healing
+- Category: Self-healing
+- Importance: `5`
+- Source inventory entry: `docs/offline-analyzer/feature-inventory.md`, section `Remote Channel Management self-healing`
+
+Mandatory concept candidates:
+
+- `selfHealing.runtime.cpeOnline`
+- `selfHealing.rcm.radioInventory`
+- `selfHealing.rcm.currentChannel`
+- `selfHealing.rcm.scanDiagnostics`
+- `selfHealing.rcm.channelScoring`
+- `selfHealing.rcm.channelWrite`
+
+Optional/degrading concept candidates:
+
+- `selfHealing.rcm.allowedChannels`
+- `score.cpe.wifi`
+- `score.wifi.interference`
+- `selfHealing.qos.scoreTelemetry`
+
+Control/write concepts:
+
+- `selfHealing.rcm.channelWrite`
+
+Diagnostic/action concepts:
+
+- `selfHealing.rcm.scanDiagnostics`
+
+Required granularity:
+
+- Device endpoint.
+- Radio.
+- Radio band.
+- Channel.
+- Associated client MAC list for filtering own/mesh scan results.
+
+History/window/frequency needs:
+
+- RCM can gate execution based on recent Wi-Fi score history after the latest channel change.
+- Scan sampling can run multiple iterations and waits for configured time windows.
+- Offline snapshots cannot prove CPE online state, diagnostic completion, scan freshness, or channel-switch execution success.
+
+Fallback behavior:
+
+- If current channel is invalid, channel switching aborts.
+- If scan/proximity data is empty, best-channel selection returns no channel instead of forcing a switch.
+- If all 5 GHz scans are during active pre-CAC, channel switch is skipped.
+- If selected channel equals current channel, no write is performed.
+- Allowed-channel policy is applied when present; otherwise possible radio channels are used.
+
+Evidence references:
+
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:491` initializes radios with `GetRadios`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:508` updates allowed channel list.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:526` reads current channel.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:555` normalizes RSSI scan results.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:556` normalizes noise results.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:559` normalizes utilization.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:561` selects best channel.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:626` writes selected channel.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:62` disables auto-channel mode.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:68` writes channel.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/scan_wifi.go:229` requests neighboring Wi-Fi diagnostic.
+- `prisme-backend/services/self-healing/remote-channel-management/src/utils/algorithm.go:50` defines best-channel scoring.
+
+Open questions:
+
+- The mapping step must distinguish static evidence for radio/channel support from runtime-only evidence for diagnostics, online state, and scan quality.
+
+### `selfHealing.aqosDynamicPrioritization`
+
+- Feature name: AQoS dynamic device-aware prioritization
+- Category: Self-healing
+- Importance: `4`
+- Source inventory entry: `docs/offline-analyzer/feature-inventory.md`, section `AQoS dynamic device-aware prioritization`
+
+Mandatory concept candidates:
+
+- `selfHealing.runtime.cpeOnline`
+- `selfHealing.qos.associatedDevices`
+- `selfHealing.qos.scoreTelemetry`
+- `selfHealing.qos.priorityControl`
+
+Optional/degrading concept candidates:
+
+- `selfHealing.qos.hostTrafficTelemetry`
+
+Control/write concepts:
+
+- `selfHealing.qos.priorityControl`
+
+Diagnostic/action concepts:
+
+- None found. The workflow uses score/traffic telemetry and CPE writes, not explicit diagnostics.
+
+Required granularity:
+
+- Device endpoint.
+- Associated client MAC.
+- Host IP address.
+- Access point for WMM enablement.
+- QoS classification entries.
+
+History/window/frequency needs:
+
+- Host Wi-Fi traffic and coverage scores are queried over the last hour.
+- CPE Wi-Fi network interference score is queried over the last hour.
+- Host traffic ordering uses last-hour host traffic.
+- Main workflow refreshes prioritization every hour and forces resync on signal/run-once.
+
+Fallback behavior:
+
+- If configured score thresholds are disabled with `NO_SCORE`, the corresponding check passes.
+- If a required score returns `NO_SCORE`, the associated check fails.
+- If no desired clients exist, existing PRISME QoS rules can be removed and no new priority rules are added.
+- Synchronization is skipped when desired MACs match current state and the 24-hour resync interval has not elapsed.
+
+Evidence references:
+
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:83` reads rolling host Wi-Fi traffic score.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:111` reads rolling host Wi-Fi coverage score.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:151` reads host traffic for ordering.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:202` reads associated devices.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:210` checks interference score gate.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:263` executes traffic prioritization.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:365` reads rolling CPE Wi-Fi network interference score.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:46` deletes old QoS classification rules.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:67` reads host by MAC.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:80` enables WMM.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:98` adds QoS classification objects.
+
+Open questions:
+
+- Static input can expose data model write capability, but cannot prove OpenSearch score/traffic history availability unless historical report data is included.
+
+### `selfHealing.aqosAirtimeFairnessTuning`
+
+- Feature name: AQoS airtime fairness tuning
+- Category: Self-healing
+- Importance: `4`
+- Source inventory entry: `docs/offline-analyzer/feature-inventory.md`, section `AQoS airtime fairness tuning`
+
+Mandatory concept candidates:
+
+- `selfHealing.runtime.cpeOnline`
+- `selfHealing.qos.associatedDevices`
+- `selfHealing.qos.hostTrafficTelemetry`
+- `selfHealing.qos.atfControl`
+
+Optional/degrading concept candidates:
+
+- `selfHealing.qos.priorityControl`
+
+Control/write concepts:
+
+- `selfHealing.qos.atfControl`
+
+Diagnostic/action concepts:
+
+- None found. The workflow uses associated-device data, prioritization state, host traffic, and ATF writes.
+
+Required granularity:
+
+- Device endpoint.
+- Associated client MAC.
+- Associated-device/client type.
+- Per-station ATF control.
+- SSID-wide ATF enable/default controls.
+
+History/window/frequency needs:
+
+- Workflow interval is 10 minutes.
+- Host traffic window is 10 minutes.
+- Greedy-client state includes cooldown and enter/exit counters.
+
+Fallback behavior:
+
+- Devices without MAC address are filtered out.
+- Prioritized hosts are excluded from greedy-client candidates.
+- Legacy clients receive a fixed ATF value when not already applied.
+- Greedy clients receive a stronger ATF value; clients are reset when airtime falls below exit threshold.
+- If no candidates exist, greedy ATF detection returns no changes.
+
+Evidence references:
+
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:17` defines the workflow interval.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:18` defines the traffic window.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:190` reads associated devices.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:199` reads prioritized host list.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:231` orders clients by traffic.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:288` applies legacy-client ATF.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:402` applies greedy-client ATF.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:426` resets greedy-client ATF.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:523` reads host traffic.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go:37` enables ATF.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go:41` sets global ATF.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go:45` writes per-station ATF.
+
+Open questions:
+
+- The feature is automatic-write capable only if station ATF and SSID ATF controls are writable and accepted by firmware at runtime.
+
+### `selfHealing.aqosRtsCtsThresholdTuning`
+
+- Feature name: AQoS RTS/CTS threshold tuning
+- Category: Self-healing
+- Importance: `3`
+- Source inventory entry: `docs/offline-analyzer/feature-inventory.md`, section `AQoS RTS/CTS threshold tuning`
+
+Mandatory concept candidates:
+
+- `selfHealing.runtime.cpeOnline`
+- `selfHealing.qos.associatedDevices`
+- `selfHealing.qos.scoreTelemetry`
+- `selfHealing.qos.hostTrafficTelemetry`
+- `selfHealing.qos.collisionMetrics`
+- `selfHealing.qos.rtsCtsControl`
+
+Optional/degrading concept candidates:
+
+- None confirmed beyond configurable thresholds/timers.
+
+Control/write concepts:
+
+- `selfHealing.qos.rtsCtsControl`
+
+Diagnostic/action concepts:
+
+- None found. The workflow uses score/traffic/packet telemetry and radio writes.
+
+Required granularity:
+
+- Device endpoint.
+- Radio.
+- Associated client grouped by radio.
+- Client MAC.
+- Host score and packet/error activity.
+- Radio collision control parameters.
+
+History/window/frequency needs:
+
+- Workflow interval is 10 minutes.
+- Host RSSI score is queried over the last 10 minutes.
+- Host traffic and packet activity are queried over the last 10 minutes.
+- State machine uses validation and cooldown timers.
+
+Fallback behavior:
+
+- Clients with RSSI score at or below minimum are ignored.
+- Clients with less than minimum traffic are ignored.
+- Received packet error rate is calculated only when received packets are present.
+- Threshold is not rewritten when the desired threshold already matches current state.
+- State transitions choose disabled, normal, aggressive, stable, or ineffective modes based on metrics and timers.
+
+Evidence references:
+
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:16` defines workflow interval.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:17` defines default RTS threshold.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:18` defines normal RTS threshold.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:19` defines aggressive RTS threshold.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:209` wraps RTS/CTS threshold setting.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:284` processes radio state.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:482` collects radio metrics.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:502` checks host RSSI score.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:512` reads host traffic.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:524` reads host packet activity.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:533` calculates received error rate.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:23` writes RTS threshold.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:24` writes retry limit.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:25` writes long retry limit.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:30` sends radio write request.
+
+Open questions:
+
+- The offline analyzer must distinguish control support from runtime effectiveness, because this workflow validates improvement over time after applying thresholds.
+
 ## Inventory Coverage Status
 
 Covered in Milestone 1:
@@ -495,13 +775,16 @@ Covered in Milestone 2:
 - `score.host.wifi`
 - `score.cpe.internet`
 
-Deferred to later milestones:
+Covered in Milestone 3:
 
-- `noc.populationScores`
 - `selfHealing.remoteChannelManagement`
 - `selfHealing.aqosDynamicPrioritization`
 - `selfHealing.aqosAirtimeFairnessTuning`
 - `selfHealing.aqosRtsCtsThresholdTuning`
+
+Deferred to later milestones:
+
+- `noc.populationScores`
 - `customerCare.wifiSettings`
 - `customerCare.topologyMap`
 - `diagnostics.speedtest`

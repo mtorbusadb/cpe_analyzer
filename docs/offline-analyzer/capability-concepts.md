@@ -8,8 +8,9 @@ Current coverage:
 
 - Milestone 1: Discovery Program concepts only.
 - Milestone 2: QoE score derived metric concepts from active score calculation code.
+- Milestone 3: Self-healing telemetry, control/action, and runtime-only concepts.
 
-Later milestones will extend this file with self-healing, customer-care, topology, and diagnostics concepts.
+Later milestones will extend this file with customer-care, topology, and diagnostics concepts.
 
 This document does not define the final raw TR-181/TR-098/vendor path mapping table. Source-code paths may appear only as evidence examples for existing PRISME behavior.
 
@@ -547,11 +548,259 @@ These concepts describe source-code-confirmed score calculation inputs and outpu
 - `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1038` reads daily host Wi-Fi history medians.
 - Notes: Daily rollups are history-dependent and cannot be proven from a single static input snapshot.
 
+## Self-Healing Concepts
+
+These concepts describe self-healing runtime dependencies discovered from workflow and activity code. They distinguish direct CPE data model reads/writes from derived OpenSearch score/traffic reads and diagnostic execution.
+
+### `selfHealing.runtime.cpeOnline`
+
+- Name: Runtime CPE online gate
+- Category: Self-healing
+- Concept type: `runtimeOnly`
+- Confidence: `high`
+- Description: Self-healing workflows wait for online CPE state before executing device activities.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:492` wraps radio discovery in `waitForOnlineAndExecuteCpeActivity`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:526` wraps current-channel read in `waitForOnlineAndExecuteCpeActivity`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:625` wraps channel write in `waitForOnlineAndExecuteCpeActivity`.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:196` waits for online state before prioritization.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:111` waits for online state before ATF logic.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:124` waits for online state before collision tuning.
+- Notes: Offline analyzer can only report this as runtime validation required.
+
+### `selfHealing.rcm.radioInventory`
+
+- Name: RCM radio inventory
+- Category: Self-healing
+- Concept type: `parameterValue`
+- Confidence: `high`
+- Description: Remote Channel Management reads Wi-Fi radio objects, frequency band, and possible channels before channel selection.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:491` initializes with `GetRadios`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:498` stores radio bands.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:499` stores possible radio channels.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/radio.go:126` defines `GetRadios`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/radio.go:142` reads radio objects.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/radio.go:154` reads radio operating band.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/radio.go:160` reads possible channels.
+- Notes: The final raw path mapping is deferred; this concept captures the required radio object metadata.
+
+### `selfHealing.rcm.allowedChannels`
+
+- Name: RCM allowed channel policy
+- Category: Self-healing
+- Concept type: `staticMetadata`
+- Confidence: `high`
+- Description: Remote Channel Management combines radio possible channels with allowed-channel policy loaded from system/platform/device metadata.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:395` defines `UpdateAllowedChannelList`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:399` executes `GetUserAllowedChannels`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:405` filters radio channels by allowed-channel policy.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/channels_allowed.go:38` defines `GetUserAllowedChannels`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/types/system_configuration.go:11` defines the 2.4 GHz allowed-channel property.
+- `prisme-backend/services/self-healing/remote-channel-management/src/types/system_configuration.go:12` defines the 5 GHz allowed-channel property.
+- `prisme-backend/services/self-healing/remote-channel-management/src/types/system_configuration.go:13` defines the 6 GHz allowed-channel property.
+- Notes: This is not solely a CPE data model requirement; it also depends on PRISME metadata configuration.
+
+### `selfHealing.rcm.currentChannel`
+
+- Name: RCM current channel read
+- Category: Self-healing
+- Concept type: `parameterValue`
+- Confidence: `high`
+- Description: Remote Channel Management reads the current radio channel before deciding whether to switch.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:526` executes `GetCurrentChannel`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:534` aborts switching when current channel is invalid.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:14` defines `GetCurrentChannel`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:31` builds the current-channel key from the radio object.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:33` reads current channel.
+- Notes: Offline support requires parameter presence/value evidence, but runtime value correctness remains unproven.
+
+### `selfHealing.rcm.channelWrite`
+
+- Name: RCM channel write
+- Category: Self-healing
+- Concept type: `controlAction`
+- Confidence: `high`
+- Description: Remote Channel Management disables auto-channel mode and writes the selected channel to the target radio.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:620` prepares channel switch update.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:626` executes `SetChannel`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:43` defines `SetChannel`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:61` builds auto-channel control key.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:62` writes auto-channel disabled.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:67` builds channel key.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:68` writes selected channel.
+- Notes: This concept requires write/control capability. Missing write support means observe/recommend may still be possible, but automatic channel switch is not.
+
+### `selfHealing.rcm.scanDiagnostics`
+
+- Name: RCM scan diagnostics
+- Category: Self-healing
+- Concept type: `diagnosticAction`
+- Confidence: `high`
+- Description: Remote Channel Management executes neighboring Wi-Fi scan diagnostics, ACS diagnostics/result reads, and pre-CAC result reads.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:280` executes repeated `ScanWifi` in run-once mode.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:291` executes `ScanWifi`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:299` executes `ScanWifiAcs`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:305` executes `PreCacResult`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/scan_wifi.go:202` defines `ScanWifi`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/scan_wifi.go:229` requests the neighboring Wi-Fi diagnostic.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/scan_wifi.go:243` polls diagnostic state.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/scan_wifi_acs.go:18` defines ACS scan-result activity.
+- `prisme-backend/services/self-healing/remote-channel-management/src/activities/pre_cac.go:33` reads pre-CAC diagnostic results.
+- Notes: Static snapshots cannot prove that diagnostics execute, complete, or return useful results.
+
+### `selfHealing.rcm.channelScoring`
+
+- Name: RCM channel scoring
+- Category: Self-healing
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: Remote Channel Management scores candidate channels using normalized RSSI/proximity, ACS noise, transmit power, blocked-by-noise, and utilization inputs.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:555` normalizes RSSI scan results.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:556` normalizes ACS noise results.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:557` normalizes transmit power.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:558` calculates blocked-by-noise percentage.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:559` normalizes utilization.
+- `prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:561` selects best channel.
+- `prisme-backend/services/self-healing/remote-channel-management/src/utils/algorithm.go:50` defines `GetBestChannel`.
+- `prisme-backend/services/self-healing/remote-channel-management/src/utils/algorithm.go:64` sums normalized sub-scores.
+- `prisme-backend/services/self-healing/remote-channel-management/src/utils/algorithm.go:87` avoids switching when the current channel score is effectively equal.
+- Notes: This is a derived algorithm concept, not a raw path mapping.
+
+### `selfHealing.qos.associatedDevices`
+
+- Name: AQoS associated devices
+- Category: Self-healing
+- Concept type: `parameterValue`
+- Confidence: `high`
+- Description: AQoS workflows read associated devices, MAC addresses, SSID/AP/radio relationships, and radio band grouping.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/devices.go:21` defines `GetAssociatedDevices`.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/devices.go:32` reads associated devices.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/devices.go:39` defines `GetAssociatedDevicesByRadio`.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/devices.go:50` reads radio objects.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/devices.go:79` reads SSID objects.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/devices.go:94` reads access point objects.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/devices.go:114` reads associated device objects.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/devices.go:135` reads associated-device MAC addresses.
+- Notes: This concept covers topology/association information needed by AQoS, not the customer-care topology feature.
+
+### `selfHealing.qos.scoreTelemetry`
+
+- Name: AQoS score telemetry
+- Category: Self-healing
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: AQoS workflows read rolling device/host score series from OpenSearch, including host Wi-Fi traffic, coverage, RSSI, and CPE Wi-Fi network interference.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:83` reads rolling host Wi-Fi traffic score.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:111` reads rolling host Wi-Fi coverage score.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:365` reads rolling CPE Wi-Fi network interference score.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:576` reads rolling host Wi-Fi RSSI score.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/scores.go:87` defines rolling device score retrieval.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/scores.go:114` queries device score series.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/scores.go:167` defines rolling host score retrieval.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/scores.go:199` queries host score series.
+- Notes: This is not directly validated from a single static data model snapshot unless score history is present in the input JSON.
+
+### `selfHealing.qos.hostTrafficTelemetry`
+
+- Name: AQoS host traffic and packet telemetry
+- Category: Self-healing
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: AQoS workflows read host Wi-Fi traffic and packet/error activity from OpenSearch over recent time windows.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:151` queries host traffic for importance ordering.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:523` queries host traffic for ATF ordering.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:512` queries host traffic during collision metrics collection.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:524` queries host packets during collision metrics collection.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/host_traffic.go:261` defines host traffic retrieval.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/host_traffic.go:274` calls `GetHostWifiTrafficActivity`.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/host_traffic.go:277` defines host packet retrieval.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/host_traffic.go:294` calls `GetHostWifiPacketsActivity`.
+- Notes: Offline static input cannot prove time-window completeness unless historical telemetry is included.
+
+### `selfHealing.qos.priorityControl`
+
+- Name: AQoS DSCP/WMM prioritization control
+- Category: Self-healing
+- Concept type: `controlAction`
+- Confidence: `high`
+- Description: Dynamic prioritization enables WMM on affected APs and creates QoS classification rules for selected client IPs.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:262` executes `PrioritizeTraffic`.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:28` defines `PrioritizeTraffic`.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:46` deletes existing PRISME QoS classification rules.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:67` reads host by MAC address.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:80` enables WMM on the touched AP.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:87` builds QoS classification objects.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:98` adds QoS classification objects.
+- Notes: Automatic support requires add/delete/write capability for QoS classification and write capability for WMM.
+
+### `selfHealing.qos.atfControl`
+
+- Name: AQoS airtime fairness control
+- Category: Self-healing
+- Concept type: `controlAction`
+- Confidence: `high`
+- Description: Airtime fairness tuning enables ATF, sets global ATF defaults, and writes per-station ATF values.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:288` applies legacy-client ATF.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:402` applies greedy-client ATF.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:426` resets greedy-client ATF.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go:24` defines `SetAtf`.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go:37` enables ATF.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go:41` sets global ATF.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go:44` builds the per-station ATF key.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go:45` writes per-station ATF.
+- Notes: This is a control/write concept; missing write capability prevents automatic ATF tuning.
+
+### `selfHealing.qos.collisionMetrics`
+
+- Name: AQoS collision tuning metrics
+- Category: Self-healing
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: Collision tuning derives per-radio collision metrics from associated clients, host RSSI score, recent traffic, packet counts, and received error rate.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:482` starts radio metrics collection.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:502` checks host RSSI score.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:512` reads host traffic.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:524` reads host packet activity.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:533` calculates received error rate.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:556` stores suspicious station count.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:558` stores worst error rate.
+- Notes: This is derived from score and telemetry histories and cannot be fully proven by path presence alone.
+
+### `selfHealing.qos.rtsCtsControl`
+
+- Name: AQoS RTS/CTS collision control
+- Category: Self-healing
+- Concept type: `controlAction`
+- Confidence: `high`
+- Description: Collision tuning writes RTS threshold and retry limits to radio objects after workflow state transitions.
+- Source-code evidence:
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:209` defines RTS/CTS threshold update wrapper.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:219` executes `CollisionTuning`.
+- `prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:284` processes radio state.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:12` defines collision tuning activity.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:19` builds the radio update object.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:23` writes RTS threshold.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:24` writes retry limit.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:25` writes long retry limit.
+- `prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:30` sends the write request.
+- Notes: Missing radio write support prevents automatic collision tuning.
+
 ## Deferred Concept Areas
 
 The following concept groups are not covered yet and will be added in later milestones:
 
-- Self-healing telemetry and control concepts.
 - Customer-care Wi-Fi management concepts.
 - Topology/map visibility concepts.
 - Speedtest and diagnostics execution concepts outside the Discovery Program.
