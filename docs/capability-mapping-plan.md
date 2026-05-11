@@ -116,6 +116,12 @@ Use UI evidence only for naming and user-visible exposure. Requirement evidence 
 
 ## Milestones
 
+Status:
+
+- Milestone 1 complete: Discovery Program concepts and draft requirements are documented.
+- Milestone 2 complete: QoE score concepts and draft requirements are documented.
+- Next locked milestone: Milestone 3, Concept Extraction From Self-Healing.
+
 ### Milestone 1: Concept Extraction From Discovery Program
 
 Scope:
@@ -252,4 +258,4 @@ Before committing this phase:
 
 ## Next Command
 
-Run `autostep` to execute Milestone 1.
+Run `autostep` to execute Milestone 3.
