@@ -108,7 +108,8 @@ If a fallback or helper exists but has no call site, record it as `deferred` or 
 Status:
 
 - Milestone 1 complete: Supported JSON input shape and evidence model are documented.
-- Next locked milestone: Milestone 2, Discovery Program Raw Parameter Mapping.
+- Milestone 2 complete: Discovery Program capability and platform feature raw parameter/rule mapping is documented.
+- Next locked milestone: Milestone 3, Score and KPI Input Mapping.
 
 ### Milestone 1: Supported JSON Input Shape and Evidence Model
 

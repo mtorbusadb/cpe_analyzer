@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This document will map canonical capability concepts to JSON input evidence, raw data model path patterns, source metric names, diagnostics/actions, and runtime-only limitations.
+This document maps canonical capability concepts to JSON input evidence, raw data model path patterns, source metric names, diagnostics/actions, and runtime-only limitations.
 
-Milestone 1 defines the table structure and mapping semantics only. Full feature mappings are intentionally deferred to later milestones.
+Milestone 2 adds source-backed Discovery Program mappings. Score, self-healing, diagnostics, and customer-care mappings remain deferred unless explicitly marked otherwise.
 
 ## Mapping Status Values
 
@@ -47,31 +47,48 @@ Each mapping row must distinguish these dimensions:
 | `evidence` | Source-code references proving the mapping. |
 | `limitations` | Static-analysis or runtime limitations. |
 
-## Starter Mapping Sections
+## Discovery Program Concepts
 
-### Raw Data Model Concepts
+Discovery Program input dependencies are source-code registry driven. The analyzer should not hardcode one manually selected path per feature when the active source registry already contains TR-181 and TR-098 rule sets.
 
-| conceptId | status | jsonEvidence | rawPathPattern | sourceMetric | requiredAccess | valueRequirement | granularity | evidence | limitations |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `discovery.capability.propertyPresence` | `deferred` | `Report[]` entries with `kind=parameter` or `kind=object` | Deferred to Milestone 2 | n/a | `read` | `path_only` | device/object/parameter | `docs/input-json-concept-mapping-plan.md:142` | Full Discovery path extraction is Milestone 2 scope. |
-| `discovery.feature.parameterValueRule` | `deferred` | `Report[]` entries with `kind=parameter` | Deferred to Milestone 2 | n/a | `read` | `value_required` | device/object/parameter | `docs/input-json-concept-mapping-plan.md:142` | Full Discovery rule extraction is Milestone 2 scope. |
-
-### Derived Metric and Score Concepts
+### Discovery Capability Concepts
 
 | conceptId | status | jsonEvidence | rawPathPattern | sourceMetric | requiredAccess | valueRequirement | granularity | evidence | limitations |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `score.qoe.metricHistory` | `deferred` | `Report[]` entries with `kind=history` | n/a | Deferred to Milestone 3 | `derived` | `history_required` | metric history | `docs/input-json-concept-mapping-plan.md:169` | Full score/KPI metric mapping is Milestone 3 scope. |
-| `customerCare.scoreDrilldown.scoreConsumption` | `deferred` | `Report[]` entries with `kind=score` or `kind=derivedMetric` | n/a | Deferred to Milestone 3 | `derived` | `value_required` | score document | `docs/input-json-concept-mapping-plan.md:169` | Score consumption must remain separate from score calculation support. |
+| `discovery.dataModel.family` | `mapped` | `Report[]` metadata or device-level metadata carrying declared data model | n/a | n/a | `read` | `value_required` | device | `prisme-backend/services/discovery-program/src/device_processor.py:111`, `prisme-backend/services/discovery-program/src/device_processor.py:139` | Static JSON must identify whether TR-181 or TR-098 rules apply; otherwise feature/capability selection is `unknown`. |
+| `discovery.capability.requirementType` | `mapped` | source registry plus `Report[]` path evidence | `Capability.Requirement.property` from active capability registry | n/a | `read` | `path_only` | device/object/parameter | `prisme-backend/services/discovery-program/src/disc_prog_capability_types.py:8`, `prisme-backend/services/discovery-program/src/disc_prog_capability_types.py:27` | Requirement type is source-derived, not supplied by input JSON. |
+| `discovery.capability.propertyPresence` | `mapped` | `Report[]` entries representing parameters or objects | `Capability.PropertyName` values from active TR-181/TR-098 capability registry | n/a | `read` | `path_only` | device/object/parameter | `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:296`, `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:302` | Input proves static presence only; it cannot prove runtime population quality. |
+| `discovery.capability.propertySet` | `mapped` | `Report[]` entries representing parameters or objects | nested `Capability.PropertySet.properties` from active capability registry | n/a | `read` | `path_only` | device/object/parameter group | `prisme-backend/services/discovery-program/src/disc_prog_capability_types.py:17`, `prisme-backend/services/discovery-program/src/disc_prog_capability_types.py:21`, `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:259`, `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:290` | AND/OR composition must be preserved exactly; collapsing a set into a flat list changes semantics. |
+| `discovery.capability.moduleStatus` | `derived_only` | derived from `Report[]` evidence and source registry | n/a | n/a | `derived` | `path_only` | capability module | `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:76`, `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:90`, `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:327` | Module status is computed from mandatory/recommended/optional requirement outcomes, not an input field. |
+| `discovery.capability.suiteScore` | `derived_only` | derived from computed capability statuses | n/a | capability score | `derived` | `value_required` | capability suite | `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:248`, `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:256`, `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:343` | Score is a Discovery-derived score, not the customer-facing QoE score family. |
 
-### Diagnostic and Runtime Concepts
+### Discovery Platform Feature Rule Concepts
 
 | conceptId | status | jsonEvidence | rawPathPattern | sourceMetric | requiredAccess | valueRequirement | granularity | evidence | limitations |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `diagnostics.speedtest.dispatch` | `deferred` | `Report[]` | Deferred to Milestone 4 | n/a | `diagnostic` | `runtime_only` | diagnostic request | `docs/input-json-concept-mapping-plan.md:196` | Static JSON can identify action capability, not execution success. |
-| `selfHealing.runtime.cpeOnline` | `runtime_only` | `Report[]` | n/a | n/a | `runtime_only` | `runtime_only` | device endpoint | `docs/offline-analyzer/capability-concepts.md:555` | Offline JSON cannot prove current online state unless external runtime metadata is supplied. |
+| `discovery.feature.ruleSet` | `mapped` | source registry plus `Report[]` evidence consumed by rules | `DiscProgFeaturesTypes.RuleSet.rules` from active TR-181/TR-098 feature registry | n/a | `read` | `path_only` or `value_required` by rule type | feature ruleset | `prisme-backend/services/discovery-program/src/disc_prog_features_types.py:51`, `prisme-backend/services/discovery-program/src/disc_prog_features_types.py:237`, `prisme-backend/services/discovery-program/src/device_processor.py:139` | Rule order, default value, and early-stop behavior are mandatory semantics. |
+| `discovery.feature.dataModelPresenceRule` | `mapped` | `Report[]` entries representing parameters or objects | `DataModelHasArgs.paths` | n/a | `read` | `path_only` | device/object/parameter group | `prisme-backend/services/discovery-program/src/disc_prog_features_types.py:149`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:244`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:279` | AND/OR operator must be preserved; a missing OR alternative does not necessarily make the feature unsupported. |
+| `discovery.feature.parameterValueRule` | `mapped` | `Report[]` parameter entries with values | path string passed to `GET` rule | n/a | `read` | `value_required` | device/object/parameter | `prisme-backend/services/discovery-program/src/disc_prog_features_types.py:22`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:111`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:138` | Missing value stops the ruleset and returns its default; presence alone is insufficient. |
+| `discovery.feature.indexedParameterValueRule` | `mapped` | `Report[]` parameter entries with `NumberOfEntries` and concrete indexed values | path string containing `.{i}.` passed to `GET_BY_IDX` | n/a | `read` | `value_required` | indexed object instance | `prisme-backend/services/discovery-program/src/disc_prog_features_types.py:26`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:140`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:180` | Requires a previous rule result to resolve the index. Static analysis must preserve the chain. |
+| `discovery.feature.indexSelectionRule` | `mapped` | `Report[]` parameter entries with `NumberOfEntries` and values for instances | `InstanceCmpArgs.path` with exactly one `.{i}.` wildcard | n/a | `read` | `value_required` | indexed object instance | `prisme-backend/services/discovery-program/src/disc_prog_features_types.py:110`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:182`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:230` | Requires `NumberOfEntries` derived from the path prefix and values for scanned instances. |
+| `discovery.feature.countMatchingInstancesRule` | `mapped` | `Report[]` parameter entries with `NumberOfEntries` and values for instances | `InstanceCmpArgs.path` with exactly one `.{i}.` wildcard | n/a | `read` | `value_required` | indexed object collection | `prisme-backend/services/discovery-program/src/disc_prog_features_types.py:36`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:308`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:360` | Requires full enough instance coverage to avoid undercounting. |
+| `discovery.feature.valueComparisonRule` | `derived_only` | previous rule output from `Report[]`-backed rule chain | n/a | n/a | `derived` | `value_required` | rule chain value | `prisme-backend/services/discovery-program/src/disc_prog_features_types.py:18`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:281`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:306` | No direct raw path; depends on the immediately preceding rule output. |
+| `discovery.feature.valueSwitchRule` | `derived_only` | previous rule output from `Report[]`-backed rule chain | n/a | n/a | `derived` | `value_required` | rule chain value | `prisme-backend/services/discovery-program/src/disc_prog_features_types.py:42`, `prisme-backend/services/discovery-program/src/disc_prog_features_types.py:205`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:400`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:411` | No direct raw path; failed match returns default by stopping the ruleset. |
+| `discovery.feature.constantRule` | `derived_only` | source registry only | n/a | n/a | `derived` | `value_required` | rule chain value | `prisme-backend/services/discovery-program/src/disc_prog_features_types.py:47`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:413`, `prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:432` | SET does not require input JSON evidence but still belongs to an ordered rule chain. |
+
+## Deferred Score and Runtime Concepts
+
+| conceptId | status | jsonEvidence | rawPathPattern | sourceMetric | requiredAccess | valueRequirement | granularity | evidence | limitations |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `score.qoe.metricHistory` | `deferred` | `Report[]` entries with history-like metric evidence | n/a | Deferred to Milestone 3 | `derived` | `history_required` | metric history | `docs/input-json-concept-mapping-plan.md` | Full score/KPI metric mapping is Milestone 3 scope. |
+| `customerCare.scoreDrilldown.scoreConsumption` | `deferred` | `Report[]` entries with score or derived metric evidence | n/a | Deferred to Milestone 3 | `derived` | `value_required` | score document | `docs/input-json-concept-mapping-plan.md` | Score consumption must remain separate from score calculation support. |
+| `diagnostics.speedtest.dispatch` | `deferred` | `Report[]` | Deferred to Milestone 4 | n/a | `diagnostic` | `runtime_only` | diagnostic request | `docs/input-json-concept-mapping-plan.md` | Static JSON can identify action capability, not execution success. |
+| `selfHealing.runtime.cpeOnline` | `runtime_only` | `Report[]` | n/a | n/a | `runtime_only` | `runtime_only` | device endpoint | `docs/offline-analyzer/capability-concepts.md` | Offline JSON cannot prove current online state unless external runtime metadata is supplied. |
 
 ## Notes
 
 - Raw path patterns are allowed in this file only when source-code-backed.
+- Discovery raw path patterns should be generated from active registries selected by `device_processor.py`, not copied manually from obsolete or commented blocks.
+- Commented-out rules in rule files are not active requirements.
 - Rows marked `deferred` are placeholders for later milestones and are not analyzer-ready mappings.
 - A later implementation registry should be generated from rows with sufficient evidence, not from placeholders.

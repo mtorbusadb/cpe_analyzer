@@ -12,6 +12,12 @@ Current coverage:
 
 Later milestones will extend this draft with customer-care, topology, and diagnostics features from `docs/offline-analyzer/feature-inventory.md`.
 
+Mapping pass note:
+
+- Input JSON mapping Milestone 2 confirms Discovery capability and platform-feature dependencies in `docs/offline-analyzer/concept-parameter-mapping.md` and `docs/offline-analyzer/feature-parameter-dependencies.md`.
+- Discovery raw path evidence must be generated from the active TR-181/TR-098 registries selected by `device_processor.py`, while rule-chain semantics come from the Discovery processors.
+- Commented-out or TODO-only Discovery rule branches remain inactive and must not be used as active analyzer requirements.
+
 This is not the final support-rule registry. It does not claim whether a specific device snapshot is supported, partial, unsupported, or unknown.
 
 ## Requirement Format
