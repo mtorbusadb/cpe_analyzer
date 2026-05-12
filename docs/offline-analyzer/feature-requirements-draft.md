@@ -819,8 +819,8 @@ Evidence references:
 - `prisme-backend/services/customer-care-agent/src/rest/handler.go:36` registers Wi-Fi suite settings update route.
 - `prisme-backend/services/customer-care-agent/src/services/wifi.go:11` delegates legacy Wi-Fi read to management.
 - `prisme-backend/services/customer-care-agent/src/services/wifi.go:38` delegates Wi-Fi suite update to management.
-- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:394` initializes the Wi-Fi suite API context.
-- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:416` builds Wi-Fi suite settings output.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:74` initializes the Wi-Fi suite API context.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:96` builds Wi-Fi suite settings output.
 - `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:441` starts update command construction.
 - `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:465` commits generated Wi-Fi configuration.
 - `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:84` reads the full Wi-Fi object tree.
@@ -943,15 +943,15 @@ Evidence references:
 
 - `prisme-backend/services/customer-care-agent/src/rest/handler.go:32` registers speedtest command route.
 - `prisme-backend/services/customer-care-agent/src/rest/speedtest.go:9` defines the speedtest handler.
-- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:36` defines speedtest dispatch.
-- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:45` resolves endpoint identity.
-- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:51` branches on QoE-agent availability metadata.
-- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:57` invokes QoE-agent speedtest.
-- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:63` invokes generic diagnostics speedtest.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:11` defines speedtest dispatch.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:20` resolves endpoint identity.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:26` branches on QoE-agent availability metadata.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:32` invokes QoE-agent speedtest.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:38` invokes generic diagnostics speedtest.
 - `prisme-backend/services/customer-care-agent/src/speedtest/speedtest.go:23` defines the QoE-agent speedtest request.
 - `prisme-backend/services/customer-care-agent/src/speedtest/speedtest.go:42` adds destination IP routing information.
 - `prisme-backend/services/customer-care-agent/src/speedtest/diagnostics.go:89` builds a diagnostic request.
-- `prisme-backend/services/customer-care-agent/src/diagnostics/diagnostics.go:230` publishes the diagnostic request.
+- `prisme-backend/services/customer-care-agent/src/speedtest/diagnostics.go:109` publishes the diagnostic request.
 - `prisme-ui/apps/customer-care-dashboard/src/api/endpoints/managementApi.ts:127` exposes the speedtest command in the UI.
 
 Open questions:

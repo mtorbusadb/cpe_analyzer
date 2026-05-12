@@ -811,7 +811,7 @@ These concepts describe self-healing runtime dependencies discovered from workfl
 - `prisme-backend/services/customer-care-agent/src/rest/handler.go:35` registers Wi-Fi suite settings read route.
 - `prisme-backend/services/customer-care-agent/src/services/wifi.go:11` delegates legacy Wi-Fi settings read to management.
 - `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:382` starts Wi-Fi suite access point and radio discovery.
-- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:394` initializes the Wi-Fi suite API context.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:74` initializes the Wi-Fi suite API context.
 - `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:57` defines the Wi-Fi suite API context initialization.
 - `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:84` reads the full Wi-Fi object tree.
 - `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:98` partitions the tree into typed object maps.
@@ -840,7 +840,7 @@ These concepts describe self-healing runtime dependencies discovered from workfl
 - Confidence: `high`
 - Description: Wi-Fi suite settings derive customer-visible access point, SSID, advertisement, isolation, status, security mode, and MLO fields from the Wi-Fi object groups.
 - Source-code evidence:
-- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:416` builds Wi-Fi suite settings output from access point groups and radios.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:96` builds Wi-Fi suite settings output from access point groups and radios.
 - `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:350` reads SSID values and references.
 - `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:364` reads access point enable and advertisement state.
 - `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:382` reads isolation and access point status.
@@ -896,11 +896,11 @@ These concepts describe self-healing runtime dependencies discovered from workfl
 - Source-code evidence:
 - `prisme-backend/services/customer-care-agent/src/rest/handler.go:32` registers speedtest command route.
 - `prisme-backend/services/customer-care-agent/src/rest/speedtest.go:9` defines the speedtest REST handler.
-- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:36` defines the service speedtest command.
-- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:45` resolves endpoint identity.
-- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:51` branches on QoE-agent availability metadata.
-- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:57` invokes the QoE-agent speedtest path.
-- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:63` invokes the diagnostics request path.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:11` defines the service speedtest command.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:20` resolves endpoint identity.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:26` branches on QoE-agent availability metadata.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:32` invokes the QoE-agent speedtest path.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:38` invokes the diagnostics request path.
 - `prisme-ui/apps/customer-care-dashboard/src/api/endpoints/managementApi.ts:127` exposes the speedtest mutation in the UI.
 - Notes: This is an action concept. A static snapshot can show related diagnostics capabilities only if the input contains enough metadata; it cannot prove that runtime execution will succeed.
 
@@ -913,7 +913,7 @@ These concepts describe self-healing runtime dependencies discovered from workfl
 - Description: When endpoint metadata indicates QoE-agent availability, customer-care starts an immediate performance test through the test API proxy using endpoint and VPN information.
 - Source-code evidence:
 - `prisme-backend/services/customer-care-agent/src/services/speedtest.go:52` obtains VPN IP address for the QoE-agent path.
-- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:57` calls the QoE-agent speedtest service.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:32` calls the QoE-agent speedtest service.
 - `prisme-backend/services/customer-care-agent/src/speedtest/speedtest.go:23` defines the QoE-agent speedtest request.
 - `prisme-backend/services/customer-care-agent/src/speedtest/speedtest.go:29` prepares the test API proxy request.
 - `prisme-backend/services/customer-care-agent/src/speedtest/speedtest.go:42` adds the destination IP header.
@@ -934,7 +934,7 @@ These concepts describe self-healing runtime dependencies discovered from workfl
 - `prisme-backend/services/customer-care-agent/src/speedtest/diagnostics.go:107` sends the diagnostic request.
 - `prisme-backend/services/customer-care-agent/src/diagnostics/diagnostics.go:180` configures the diagnostics request subject.
 - `prisme-backend/services/customer-care-agent/src/diagnostics/diagnostics.go:216` marshals the diagnostic request.
-- `prisme-backend/services/customer-care-agent/src/diagnostics/diagnostics.go:230` publishes the diagnostic request.
+- `prisme-backend/services/customer-care-agent/src/speedtest/diagnostics.go:109` publishes the diagnostic request.
 - Notes: This path is runtime action dispatch. Offline analysis can report required action support and configuration evidence but cannot execute it.
 
 ### `customerCare.scoreDrilldown.scoreConsumption`
