@@ -122,7 +122,8 @@ Status:
 - Milestone 2 complete: QoE score concepts and draft requirements are documented.
 - Milestone 3 complete: Self-healing telemetry, control/action, and runtime-only concepts are documented.
 - Milestone 4 complete: Customer-care Wi-Fi settings, topology map, speedtest, and score drill-down concepts are documented.
-- Next unlocked milestone: Milestone 5, Review and Gate.
+- Milestone 5 complete: Concept and requirement documents were reviewed and gated.
+- Next phase: source-code-backed mapping from supported input JSON data to canonical concepts.
 
 ### Milestone 1: Concept Extraction From Discovery Program
 
@@ -136,6 +137,7 @@ Files:
 
 - `docs/offline-analyzer/capability-concepts.md`
 - `docs/offline-analyzer/feature-requirements-draft.md`
+- `docs/offline-analyzer/feature-inventory.md`
 
 Commands:
 
@@ -260,4 +262,4 @@ Before committing this phase:
 
 ## Next Command
 
-Run `planlock` to lock Milestone 5, or run `autostep` if Milestone 5 is already approved.
+Run `planlock` to define the next phase for input JSON to canonical concept mapping.

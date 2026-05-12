@@ -244,12 +244,16 @@ Importance scale:
 - Importance: `4`
 - Description: Provides structured and flat CPE network maps, including gateway, interfaces, hosts, and mesh/client entities.
 - Importance rationale: High-value support visualization for understanding connected devices and local topology.
-- CPE-derived value usage: Yes, but partly indirect. It calls device-service topology/status output and can merge host snapshot data when map output lacks hosts. Final raw parameter mapping is deferred.
+- CPE-derived value usage: Yes, but partly indirect. The active path calls device-service topology/status output. Host-snapshot fallback code exists in the repository, but the Milestone 5 review did not find an active call site, so it must not be treated as a current feature requirement until a call path is confirmed.
 - Active implementation evidence:
 - `prisme-backend/services/customer-care-agent/src/rest/handler.go:52` registers CPE map endpoints.
 - `prisme-backend/services/customer-care-agent/src/services/map.go:12` retrieves CPE map from device-service.
 - `prisme-backend/services/customer-care-agent/src/services/map.go:27` calls `DeviceService.GetStatusResponse`.
-- `prisme-backend/services/customer-care-agent/src/services/map_bulk_fallback.go:85` detects missing hosts and starts fallback.
+
+Unwired candidate evidence:
+
+- `prisme-backend/services/customer-care-agent/src/services/map_bulk_fallback.go:39` defines a fallback function, but no active call site was found in Milestone 5 review.
+- `prisme-backend/services/customer-care-agent/src/services/map_bulk_fallback.go:85` detects missing hosts inside the fallback helper.
 - `prisme-backend/services/customer-care-agent/src/services/map_bulk_fallback.go:176` maps latest host snapshots to map hosts.
 - `prisme-backend/services/customer-care-agent/src/services/map_bulk_fallback.go:254` merges hosts into flat map payloads.
 - `prisme-backend/services/customer-care-agent/src/services/map_bulk_fallback.go:297` merges hosts into structured map payloads.
