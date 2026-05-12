@@ -123,7 +123,8 @@ Status:
 - Milestone 3 complete: Self-healing telemetry, control/action, and runtime-only concepts are documented.
 - Milestone 4 complete: Customer-care Wi-Fi settings, topology map, speedtest, and score drill-down concepts are documented.
 - Milestone 5 complete: Concept and requirement documents were reviewed and gated.
-- Next phase: source-code-backed mapping from supported input JSON data to canonical concepts.
+- Next locked phase: source-code-backed mapping from supported input JSON data to canonical concepts.
+- Phase plan: `docs/input-json-concept-mapping-plan.md`.
 
 ### Milestone 1: Concept Extraction From Discovery Program
 
@@ -262,4 +263,4 @@ Before committing this phase:
 
 ## Next Command
 
-Run `planlock` to define the next phase for input JSON to canonical concept mapping.
+Run `autostep` to execute Milestone 1 in `docs/input-json-concept-mapping-plan.md`.
