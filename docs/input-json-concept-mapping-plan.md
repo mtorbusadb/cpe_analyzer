@@ -107,7 +107,8 @@ If a fallback or helper exists but has no call site, record it as `deferred` or 
 
 Status:
 
-- Next locked milestone: Milestone 1, Supported JSON Input Shape and Evidence Model.
+- Milestone 1 complete: Supported JSON input shape and evidence model are documented.
+- Next locked milestone: Milestone 2, Discovery Program Raw Parameter Mapping.
 
 ### Milestone 1: Supported JSON Input Shape and Evidence Model
 
@@ -265,4 +266,4 @@ Before committing each milestone:
 
 ## Next Command
 
-Run `autostep` to execute Milestone 1.
+Run `autostep` to execute Milestone 2.
