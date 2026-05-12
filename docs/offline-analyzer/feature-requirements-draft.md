@@ -17,6 +17,8 @@ Mapping pass note:
 - Input JSON mapping Milestone 2 confirms Discovery capability and platform-feature dependencies in `docs/offline-analyzer/concept-parameter-mapping.md` and `docs/offline-analyzer/feature-parameter-dependencies.md`.
 - Discovery raw path evidence must be generated from the active TR-181/TR-098 registries selected by `device_processor.py`, while rule-chain semantics come from the Discovery processors.
 - Commented-out or TODO-only Discovery rule branches remain inactive and must not be used as active analyzer requirements.
+- Input JSON mapping Milestone 3 confirms active QoE score dependencies as derived metric histories and score output fields; score consumption remains separate from score calculation.
+- GPON, L2TP, and xDSL-standard WAN access score branches remain incomplete/TBD where the source code says so.
 
 This is not the final support-rule registry. It does not claim whether a specific device snapshot is supported, partial, unsupported, or unknown.
 
@@ -343,13 +345,13 @@ Fallback behavior:
 
 Evidence references:
 
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:165` calculates CPE Wi-Fi noise score.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:166` calculates CPE Wi-Fi channel-utilization score.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:167` composes network interference score.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:168` calculates CPE Wi-Fi score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:171` calculates CPE Wi-Fi noise score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:172` calculates CPE Wi-Fi channel-utilization score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:176` composes network interference score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:177` calculates CPE Wi-Fi score.
 - `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:421` weights host score contributions.
 - `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:439` derives CPE Wi-Fi coverage score.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:444` derives CPE Wi-Fi traffic score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:462` derives CPE Wi-Fi traffic score.
 - `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1196` implements CPE Wi-Fi truth-table fallback behavior.
 
 Open questions:
@@ -403,14 +405,14 @@ Fallback behavior:
 Evidence references:
 
 - `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:382` derives host Wi-Fi coverage.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:388` derives host Wi-Fi traffic.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:394` calculates host Wi-Fi score.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:397` assigns host score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:384` derives host Wi-Fi traffic.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:385` calculates host Wi-Fi score.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:387` assigns host score.
 - `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1232` implements host Wi-Fi truth-table fallback behavior.
 - `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_ap_X_instance_X_signal_strength.js:34` stores host signal-strength history.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_ap_X_instance_X_host_last_data_downlink_rate_kbps.js:75` stores host downlink-rate history.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_ap_X_instance_X_stats_error_rate.js:134` stores host sent-error-rate history.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_ap_X_instance_X_stats_error_rate.js:153` stores host received-error-rate history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_ap_X_instance_X_host_last_data_downlink_rate_kbps.js:33` stores host downlink-rate history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_ap_X_instance_X_stats_error_rate.js:45` stores host sent-error-rate history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/sampling/qoe_ap_X_instance_X_stats_error_rate.js:64` stores host received-error-rate history.
 
 Open questions:
 
@@ -477,10 +479,10 @@ Evidence references:
 - `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:808` reads GPON inputs but leaves GPON scoring as TBD.
 - `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:814` leaves L2TP scoring as TBD.
 - `tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:825` composes Internet score.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/ipping/qoe_wan_ping_averageresponsetime_ms.js:140` stores ping average-response-time history.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/ipping/qoe_wan_ping_packetLoss.js:154` stores packet-loss history.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/download/qoe_download_total_kbps.js:99` stores download history.
-- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/upload/qoe_upload_total_kbps.js:127` stores upload history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/ipping/qoe_wan_ping_averageresponsetime_ms.js:6` stores ping average-response-time history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/ipping/qoe_wan_ping_packetLoss.js:9` stores packet-loss history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/download/qoe_download_total_kbps.js:21` stores download history.
+- `tss/services/report-parser/src/main/resources/poc/javascript/default/kpi/upload/qoe_upload_total_kbps.js:21` stores upload history.
 
 Open questions:
 

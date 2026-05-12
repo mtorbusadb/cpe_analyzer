@@ -109,7 +109,8 @@ Status:
 
 - Milestone 1 complete: Supported JSON input shape and evidence model are documented.
 - Milestone 2 complete: Discovery Program capability and platform feature raw parameter/rule mapping is documented.
-- Next locked milestone: Milestone 3, Score and KPI Input Mapping.
+- Milestone 3 complete: Score and KPI input mapping is documented.
+- Next locked milestone: Milestone 4, Self-Healing and Customer-Care Control Mapping.
 
 ### Milestone 1: Supported JSON Input Shape and Evidence Model
 
