@@ -121,7 +121,8 @@ Status:
 - Milestone 1 complete: Discovery Program concepts and draft requirements are documented.
 - Milestone 2 complete: QoE score concepts and draft requirements are documented.
 - Milestone 3 complete: Self-healing telemetry, control/action, and runtime-only concepts are documented.
-- Next locked milestone: Milestone 4, Concept Extraction From Customer-Care and Diagnostics.
+- Milestone 4 complete: Customer-care Wi-Fi settings, topology map, speedtest, and score drill-down concepts are documented.
+- Next unlocked milestone: Milestone 5, Review and Gate.
 
 ### Milestone 1: Concept Extraction From Discovery Program
 
@@ -259,4 +260,4 @@ Before committing this phase:
 
 ## Next Command
 
-Run `autostep` to execute Milestone 4.
+Run `planlock` to lock Milestone 5, or run `autostep` if Milestone 5 is already approved.

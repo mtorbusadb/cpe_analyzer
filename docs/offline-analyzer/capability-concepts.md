@@ -797,11 +797,172 @@ These concepts describe self-healing runtime dependencies discovered from workfl
 - `prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:30` sends the write request.
 - Notes: Missing radio write support prevents automatic collision tuning.
 
+## Customer-Care and Diagnostics Concepts
+
+### `customerCare.wifi.fullTreeRead`
+
+- Name: Customer-care Wi-Fi full tree read
+- Category: Customer care
+- Concept type: `parameterValue`
+- Confidence: `high`
+- Description: Customer-care Wi-Fi suite settings initialize an internal Wi-Fi context from the endpoint data model and split the result into radio, access point, SSID, security, and Data Elements SSID object groups.
+- Source-code evidence:
+- `prisme-backend/services/customer-care-agent/src/rest/handler.go:33` registers legacy Wi-Fi settings routes.
+- `prisme-backend/services/customer-care-agent/src/rest/handler.go:35` registers Wi-Fi suite settings read route.
+- `prisme-backend/services/customer-care-agent/src/services/wifi.go:11` delegates legacy Wi-Fi settings read to management.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:382` starts Wi-Fi suite access point and radio discovery.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:394` initializes the Wi-Fi suite API context.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:57` defines the Wi-Fi suite API context initialization.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:84` reads the full Wi-Fi object tree.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:98` partitions the tree into typed object maps.
+- Notes: This is a direct data model dependency. The concept intentionally stops at source-confirmed object groups and does not define the final raw path mapping table.
+
+### `customerCare.wifi.radioCapabilities`
+
+- Name: Customer-care Wi-Fi radio capability view
+- Category: Customer care
+- Concept type: `parameterValue`
+- Confidence: `high`
+- Description: Wi-Fi suite settings expose radio status, standards, possible channels, supported bandwidths, and fallback defaults used when capability values are absent.
+- Source-code evidence:
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:255` reads radio status and operating standards.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:280` resolves possible channels.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:287` falls back to default channels when possible channels are empty.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:305` resolves supported bandwidths.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:312` falls back to default bandwidths when supported bandwidths are empty.
+- Notes: The fallback defaults mean missing channel/bandwidth capability values may degrade precision rather than always blocking display, but write safety still depends on runtime acceptance.
+
+### `customerCare.wifi.apSsidSecuritySettings`
+
+- Name: Customer-care Wi-Fi AP, SSID, and security settings
+- Category: Customer care
+- Concept type: `parameterValue`
+- Confidence: `high`
+- Description: Wi-Fi suite settings derive customer-visible access point, SSID, advertisement, isolation, status, security mode, and MLO fields from the Wi-Fi object groups.
+- Source-code evidence:
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:416` builds Wi-Fi suite settings output from access point groups and radios.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:350` reads SSID values and references.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:364` reads access point enable and advertisement state.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:382` reads isolation and access point status.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:396` maps access point security mode.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:815` generates SSID enable, name, and MLO commands for changed settings.
+- Notes: This concept is both a read/display dependency and, when paired with write support, part of customer-care configuration management.
+
+### `customerCare.wifi.configurationWrite`
+
+- Name: Customer-care Wi-Fi configuration write
+- Category: Customer care
+- Concept type: `controlAction`
+- Confidence: `high`
+- Description: Wi-Fi suite updates compare requested settings with current device state, build only changed AP/radio/security/SSID commands, and commit them through the existing management path.
+- Source-code evidence:
+- `prisme-backend/services/customer-care-agent/src/rest/handler.go:36` registers Wi-Fi suite settings update route.
+- `prisme-backend/services/customer-care-agent/src/services/wifi.go:38` delegates Wi-Fi suite updates to management.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:441` starts command construction for changed Wi-Fi settings.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:451` builds access point update commands.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:457` builds radio update commands.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:465` commits generated Wi-Fi configuration.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:147` documents endpoint-specific commit behavior.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:153` executes configuration through the campaign executor for one endpoint type.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:175` connects the data model client for the other endpoint type.
+- `prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:180` writes generated data model objects.
+- Notes: Offline support must distinguish read-only Wi-Fi settings from automatic write capability.
+
+### `customerCare.topology.deviceServiceMap`
+
+- Name: Customer-care topology map from device service
+- Category: Customer care
+- Concept type: `runtimeOnly`
+- Confidence: `high`
+- Description: Customer-care topology map endpoints resolve the device endpoint and proxy the current map or flat-map response from device-service status.
+- Source-code evidence:
+- `prisme-backend/services/customer-care-agent/src/rest/handler.go:52` registers structured map route.
+- `prisme-backend/services/customer-care-agent/src/rest/handler.go:54` registers flat map route.
+- `prisme-backend/services/customer-care-agent/src/rest/map.go:11` defines the map response handler.
+- `prisme-backend/services/customer-care-agent/src/rest/map.go:28` calls the customer-care map service.
+- `prisme-backend/services/customer-care-agent/src/services/map.go:12` defines `GetCpeMap`.
+- `prisme-backend/services/customer-care-agent/src/services/map.go:21` resolves endpoint identity.
+- `prisme-backend/services/customer-care-agent/src/services/map.go:27` calls device-service status response.
+- `prisme-ui/apps/customer-care-dashboard/src/api/endpoints/mapApi.ts:7` exposes the customer-care map query in the UI.
+- Notes: This is an indirect API/runtime dependency, not a direct raw snapshot requirement unless the same topology payload is included in analyzer input.
+
+### `diagnostics.speedtest.dispatch`
+
+- Name: Customer-care speedtest dispatch
+- Category: Diagnostics
+- Concept type: `diagnosticAction`
+- Confidence: `high`
+- Description: Customer-care speedtest resolves endpoint metadata and dispatches either through the QoE-agent path or through the generic diagnostics request path.
+- Source-code evidence:
+- `prisme-backend/services/customer-care-agent/src/rest/handler.go:32` registers speedtest command route.
+- `prisme-backend/services/customer-care-agent/src/rest/speedtest.go:9` defines the speedtest REST handler.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:36` defines the service speedtest command.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:45` resolves endpoint identity.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:51` branches on QoE-agent availability metadata.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:57` invokes the QoE-agent speedtest path.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:63` invokes the diagnostics request path.
+- `prisme-ui/apps/customer-care-dashboard/src/api/endpoints/managementApi.ts:127` exposes the speedtest mutation in the UI.
+- Notes: This is an action concept. A static snapshot can show related diagnostics capabilities only if the input contains enough metadata; it cannot prove that runtime execution will succeed.
+
+### `diagnostics.speedtest.qoeAgentAction`
+
+- Name: QoE-agent speedtest action
+- Category: Diagnostics
+- Concept type: `diagnosticAction`
+- Confidence: `high`
+- Description: When endpoint metadata indicates QoE-agent availability, customer-care starts an immediate performance test through the test API proxy using endpoint and VPN information.
+- Source-code evidence:
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:52` obtains VPN IP address for the QoE-agent path.
+- `prisme-backend/services/customer-care-agent/src/services/speedtest.go:57` calls the QoE-agent speedtest service.
+- `prisme-backend/services/customer-care-agent/src/speedtest/speedtest.go:23` defines the QoE-agent speedtest request.
+- `prisme-backend/services/customer-care-agent/src/speedtest/speedtest.go:29` prepares the test API proxy request.
+- `prisme-backend/services/customer-care-agent/src/speedtest/speedtest.go:42` adds the destination IP header.
+- `prisme-backend/services/customer-care-agent/src/speedtest/speedtest.go:46` sends the request.
+- Notes: This path depends on runtime metadata, VPN reachability, and test-api availability, not just CPE data model paths.
+
+### `diagnostics.speedtest.diagnosticsRequest`
+
+- Name: Generic diagnostics speedtest request
+- Category: Diagnostics
+- Concept type: `diagnosticAction`
+- Confidence: `high`
+- Description: When the QoE-agent path is unavailable, customer-care builds a speedtest diagnostic request and publishes it to the diagnostics request subject.
+- Source-code evidence:
+- `prisme-backend/services/customer-care-agent/src/speedtest/diagnostics.go:89` starts construction of the diagnostic request.
+- `prisme-backend/services/customer-care-agent/src/speedtest/diagnostics.go:97` assigns device identity.
+- `prisme-backend/services/customer-care-agent/src/speedtest/diagnostics.go:104` attaches QoE speedtest configuration.
+- `prisme-backend/services/customer-care-agent/src/speedtest/diagnostics.go:107` sends the diagnostic request.
+- `prisme-backend/services/customer-care-agent/src/diagnostics/diagnostics.go:180` configures the diagnostics request subject.
+- `prisme-backend/services/customer-care-agent/src/diagnostics/diagnostics.go:216` marshals the diagnostic request.
+- `prisme-backend/services/customer-care-agent/src/diagnostics/diagnostics.go:230` publishes the diagnostic request.
+- Notes: This path is runtime action dispatch. Offline analysis can report required action support and configuration evidence but cannot execute it.
+
+### `customerCare.scoreDrilldown.scoreConsumption`
+
+- Name: Customer-care score drill-down consumption
+- Category: Customer care
+- Concept type: `derivedMetric`
+- Confidence: `high`
+- Description: Customer-care score drill-down endpoints consume already-calculated device, host, host-list, and time-series scores from the score service and expose them for troubleshooting.
+- Source-code evidence:
+- `prisme-backend/services/customer-care-agent/src/rest/handler.go:64` registers CPE score route.
+- `prisme-backend/services/customer-care-agent/src/rest/handler.go:67` registers host score route.
+- `prisme-backend/services/customer-care-agent/src/rest/handler.go:69` registers host-list score route.
+- `prisme-backend/services/customer-care-agent/src/rest/scores.go:12` defines device score handler.
+- `prisme-backend/services/customer-care-agent/src/rest/scores.go:30` defines device score series handler.
+- `prisme-backend/services/customer-care-agent/src/rest/scores.go:62` defines host score handler.
+- `prisme-backend/services/customer-care-agent/src/rest/scores.go:86` defines host score series handler.
+- `prisme-backend/services/customer-care-agent/src/rest/scores.go:124` defines host-list score handler.
+- `prisme-backend/services/customer-care-agent/src/services/scores.go:16` retrieves device score.
+- `prisme-backend/services/customer-care-agent/src/services/scores.go:53` retrieves device score series.
+- `prisme-backend/services/customer-care-agent/src/services/scores.go:92` retrieves host score.
+- `prisme-backend/services/customer-care-agent/src/services/scores.go:115` retrieves host score series.
+- `prisme-backend/services/customer-care-agent/src/services/scores.go:141` retrieves host-list scores.
+- `prisme-ui/apps/customer-care-dashboard/src/api/endpoints/hostApi.ts:38` exposes host-list scores in the UI.
+- Notes: This is not a direct data model requirement for the analyzer. It depends on prior score calculation and score storage availability.
+
 ## Deferred Concept Areas
 
-The following concept groups are not covered yet and will be added in later milestones:
+The following concept group is not covered yet and will be added in a later milestone:
 
-- Customer-care Wi-Fi management concepts.
-- Topology/map visibility concepts.
-- Speedtest and diagnostics execution concepts outside the Discovery Program.
 - Raw input JSON parsing concepts.
