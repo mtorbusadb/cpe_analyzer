@@ -111,7 +111,8 @@ Status:
 - Milestone 2 complete: Discovery Program capability and platform feature raw parameter/rule mapping is documented.
 - Milestone 3 complete: Score and KPI input mapping is documented.
 - Milestone 4 complete: Self-Healing and Customer-Care control/action mapping is documented.
-- Next locked milestone: Milestone 5, Feature Dependency Matrix and Gate.
+- Milestone 5 complete: Feature dependency matrix coverage and gate are documented.
+- Next locked milestone: Implementation planning can start after human review.
 
 ### Milestone 1: Supported JSON Input Shape and Evidence Model
 
@@ -269,4 +270,4 @@ Before committing each milestone:
 
 ## Next Command
 
-Run `autostep` to execute Milestone 5.
+Review the mapped dependency matrix, then start implementation planning after human approval.
