@@ -11,7 +11,7 @@ Device
 
 Summary
   supportedFeatures: 0
-  partialFeatures: 2
+  partialFeatures: 3
   unsupportedFeatures: 13
   unknownFeatures: 0
   implementationNotFoundFeatures: 0
@@ -23,6 +23,7 @@ Feature Matrix
   - unsupported              diagnostics.speedtest                      Speed-test diagnostics
   - partial                  discovery.capabilityScan                   Discovery capability scan
   - partial                  discovery.platformFeatureScan              Platform feature scan
+  - partial                  discovery.rediscovery                      Firmware rediscovery workflow
   - unsupported              noc.populationScores                       NOC population score analytics
   - unsupported              score.cpe.internet                         CPE internet score
   - unsupported              score.cpe.overall                          Overall CPE QoE score
@@ -142,6 +143,21 @@ Feature Details
       - discovery.platformFeatureScan.dataModel (discovery.dataModel.family) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels, device.declaredDataModel
       - discovery.platformFeatureScan.pathRule (discovery.feature.dataModelPresenceRule) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
       - discovery.platformFeatureScan.valueRule (discovery.feature.parameterValueRule) [optional]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
+
+  discovery.rediscovery
+    name: Firmware rediscovery workflow
+    category: Discovery
+    support: partial
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Matched requirements:
+      - discovery.rediscovery.capabilityScan (discovery.capabilityScan) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels, device.declaredDataModel
+      - discovery.rediscovery.platformFeatureScan (discovery.platformFeatureScan) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels, device.declaredDataModel
+    Missing optional / degraded evidence:
+      - discovery.rediscovery.executionTrigger (discovery.rediscovery.trigger) [optional]
+        expected: Runtime rediscovery trigger
+        candidates: discovery.rediscovery.trigger
+        impact: Offline analyzer can report static readiness but cannot execute rediscovery or monitor live completion.
 
   noc.populationScores
     name: NOC population score analytics
@@ -367,6 +383,7 @@ Runtime Validation Limitations
   - diagnostics.speedtest: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - discovery.capabilityScan: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - discovery.platformFeatureScan: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - discovery.rediscovery: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - noc.populationScores: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - score.cpe.internet: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - score.cpe.overall: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
@@ -413,6 +430,12 @@ Source Evidence
     - prisme-backend/services/discovery-program/src/disc_prog_features_types.py:51-51 RuleSet: Documents ordered rule processing.
     - prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:111-111 GET: Reads direct parameter values.
     - prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:244-244 DataModelHas: Checks data model path presence.
+  discovery.rediscovery
+    - prisme-ui/apps/discovery-dashboard/src/api/rtk/deviceApi.ts:54-54 rediscoverAllDevices: Exposes all-device rediscovery mutation.
+    - prisme-ui/apps/discovery-dashboard/src/api/rtk/deviceApi.ts:65-65 rediscoverFirmware: Exposes per-firmware rediscovery mutation.
+    - prisme-ui/apps/discovery-dashboard/src/hooks/useDeviceRediscoveryAndMonitor.ts:34-34 useDeviceRediscoveryAndMonitor: Triggers rediscovery and starts monitoring.
+    - prisme-ui/apps/discovery-dashboard/src/hooks/useDeviceRediscoveryAndMonitor.ts:41-41 monitoring: Polls rediscovery progress.
+    - prisme-ui/apps/discovery-dashboard/src/hooks/useDeviceRediscoveryAndMonitor.ts:50-50 refetch: Refreshes capabilities and states during monitoring.
   noc.populationScores
     - prisme-backend/services/network-operation-center/src/rest/handler.go:23-23 score routes: Registers NOC score routes.
     - prisme-backend/services/network-operation-center/src/score/service.go:23-23 score service: Defines NOC score service.

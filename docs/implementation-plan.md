@@ -505,3 +505,21 @@ Phase 4 is complete when:
 ### Next Command
 
 Run `autostep` to execute Phase 4.
+
+## Phase 5 Autostep - Runtime Rediscovery Coverage
+
+### Scope
+
+Add `discovery.rediscovery` to the default registry as a runtime-only workflow that depends on the underlying static Discovery capability and platform-feature scan evidence.
+
+### Acceptance Criteria
+
+- `discovery.rediscovery` appears in the default text report.
+- Static discovery evidence can make it `partial`, never fully runtime-supported.
+- Missing underlying discovery evidence makes it `unsupported`.
+- Source evidence points to the rediscovery API/hook call paths with line numbers.
+- Full gate continues to pass.
+
+### Next Command
+
+Run `planlock` before the next expansion or hardening step.

@@ -34,6 +34,21 @@ pub fn phase1_features() -> Vec<FeatureDefinition> {
             discovery_feature_refs(),
         ),
 
+
+        feature(
+            "discovery.rediscovery",
+            "Firmware rediscovery workflow",
+            "Discovery",
+            EvidenceConfidence::High,
+            false,
+            false,
+            vec![
+                req("discovery.rediscovery.capabilityScan", "discovery.capabilityScan", "Underlying capability scan evidence", RequirementGroup::Mandatory, MatchMode::Present, vec!["Device.", "InternetGatewayDevice.", "device.declaredDataModel"], "Rediscovery cannot be assessed offline unless the underlying capability scan can be assessed from the snapshot."),
+                req("discovery.rediscovery.platformFeatureScan", "discovery.platformFeatureScan", "Underlying platform feature scan evidence", RequirementGroup::Mandatory, MatchMode::Present, vec!["Device.", "InternetGatewayDevice.", "device.declaredDataModel"], "Rediscovery cannot be assessed offline unless the underlying feature scan can be assessed from the snapshot."),
+                req("discovery.rediscovery.executionTrigger", "discovery.rediscovery.trigger", "Runtime rediscovery trigger", RequirementGroup::Optional, MatchMode::Diagnostic, vec!["discovery.rediscovery.trigger"], "Offline analyzer can report static readiness but cannot execute rediscovery or monitor live completion."),
+            ],
+            rediscovery_refs(),
+        ),
         feature(
             "score.cpe.overall",
             "Overall CPE QoE score",
@@ -360,6 +375,41 @@ fn discovery_feature_refs() -> Vec<SourceCodeReference> {
             244,
             "DataModelHas",
             "Checks data model path presence.",
+        ),
+    ]
+}
+
+fn rediscovery_refs() -> Vec<SourceCodeReference> {
+    vec![
+        src(
+            "prisme-ui/apps/discovery-dashboard/src/api/rtk/deviceApi.ts",
+            54,
+            "rediscoverAllDevices",
+            "Exposes all-device rediscovery mutation.",
+        ),
+        src(
+            "prisme-ui/apps/discovery-dashboard/src/api/rtk/deviceApi.ts",
+            65,
+            "rediscoverFirmware",
+            "Exposes per-firmware rediscovery mutation.",
+        ),
+        src(
+            "prisme-ui/apps/discovery-dashboard/src/hooks/useDeviceRediscoveryAndMonitor.ts",
+            34,
+            "useDeviceRediscoveryAndMonitor",
+            "Triggers rediscovery and starts monitoring.",
+        ),
+        src(
+            "prisme-ui/apps/discovery-dashboard/src/hooks/useDeviceRediscoveryAndMonitor.ts",
+            41,
+            "monitoring",
+            "Polls rediscovery progress.",
+        ),
+        src(
+            "prisme-ui/apps/discovery-dashboard/src/hooks/useDeviceRediscoveryAndMonitor.ts",
+            50,
+            "refetch",
+            "Refreshes capabilities and states during monitoring.",
         ),
     ]
 }

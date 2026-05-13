@@ -145,6 +145,36 @@ fn custom_registry_covers_supported_unknown_and_implementation_not_found() {
 }
 
 #[test]
+fn rediscovery_is_partial_when_underlying_static_discovery_evidence_exists() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/basic-supported.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    let feature = report
+        .features
+        .iter()
+        .find(|feature| feature.feature_id == "discovery.rediscovery")
+        .unwrap();
+    assert_eq!(feature.support, SupportStatus::Partial);
+    assert!(feature.runtime_validation_required);
+    assert!(!feature.missing_optional_requirements.is_empty());
+}
+
+#[test]
+fn rediscovery_is_unsupported_without_underlying_static_discovery_evidence() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/missing-mandatory.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    assert_eq!(
+        feature_status(&report, "discovery.rediscovery"),
+        SupportStatus::Unsupported
+    );
+}
+
+#[test]
 fn mapped_score_consumption_features_are_assessed_from_score_evidence() {
     let snapshot = load_snapshot(Path::new(
         "tests/fixtures/offline-analyzer/score-consumption.json",
@@ -181,6 +211,7 @@ fn expanded_mapped_features_are_present_in_default_report() {
         "customerCare.scoreDrilldown",
         "customerCare.topologyMap",
         "noc.populationScores",
+        "discovery.rediscovery",
     ] {
         assert!(
             report
