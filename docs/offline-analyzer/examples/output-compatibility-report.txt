@@ -12,21 +12,63 @@ Device
 Summary
   supportedFeatures: 0
   partialFeatures: 2
-  unsupportedFeatures: 6
+  unsupportedFeatures: 10
   unknownFeatures: 0
   implementationNotFoundFeatures: 0
 
 Feature Matrix
+  - unsupported              customerCare.scoreDrilldown                Customer-care score drill-down
+  - unsupported              customerCare.topologyMap                   Customer-care topology map
   - unsupported              customerCare.wifiSettings                  Customer-care Wi-Fi settings
   - unsupported              diagnostics.speedtest                      Speed-test diagnostics
   - partial                  discovery.capabilityScan                   Discovery capability scan
   - partial                  discovery.platformFeatureScan              Platform feature scan
+  - unsupported              noc.populationScores                       NOC population score analytics
   - unsupported              score.cpe.internet                         CPE internet score
+  - unsupported              score.cpe.overall                          Overall CPE QoE score
   - unsupported              score.cpe.wifi                             CPE Wi-Fi score
   - unsupported              score.host.wifi                            Host Wi-Fi score
   - unsupported              selfHealing.remoteChannelManagement        Remote channel management
 
 Feature Details
+  customerCare.scoreDrilldown
+    name: Customer-care score drill-down
+    category: CustomerCare
+    support: unsupported
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Missing for support:
+      - customerCare.scoreDrilldown.deviceScore (customerCare.scoreDrilldown.scoreConsumption) [mandatory]
+        expected: Device score document
+        candidates: qoe_cpe_score, scores.scores.current.qoe_cpe_score, customerCare.score.device
+        impact: Customer-care score drill-down cannot display device score without score document evidence.
+    Missing optional / degraded evidence:
+      - customerCare.scoreDrilldown.hostScore (customerCare.scoreDrilldown.scoreConsumption) [optional]
+        expected: Host score document
+        candidates: qoe_host_wifi_score, scores.scores.current.qoe_host_wifi_score, customerCare.score.host
+        impact: Host drill-down is degraded without host score evidence.
+      - customerCare.scoreDrilldown.scoreSeries (score.qoe.dailyScoreHistory) [optional]
+        expected: Score time series
+        candidates: scores.scores.history, customerCare.score.series
+        impact: Time-series drill-down is unavailable without score history evidence.
+
+  customerCare.topologyMap
+    name: Customer-care topology map
+    category: CustomerCare
+    support: unsupported
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Missing for support:
+      - customerCare.topologyMap.deviceServiceMap (customerCare.topology.deviceServiceMap) [mandatory]
+        expected: Topology payload from device service
+        candidates: customerCare.topology.deviceServiceMap, topology.map, topology.flatMap
+        impact: Static CPE parameter JSON does not include the runtime topology map payload consumed by customer care.
+    Missing optional / degraded evidence:
+      - customerCare.topologyMap.bulkFallback (customerCare.topology.bulkFallback) [optional]
+        expected: Inactive bulk fallback evidence
+        candidates: customerCare.topology.bulkFallback
+        impact: Bulk fallback code exists but no active call path was confirmed; do not treat it as required support.
+
   customerCare.wifiSettings
     name: Customer-care Wi-Fi settings
     category: CustomerCare
@@ -98,6 +140,23 @@ Feature Details
       - discovery.platformFeatureScan.pathRule (discovery.feature.dataModelPresenceRule) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
       - discovery.platformFeatureScan.valueRule (discovery.feature.parameterValueRule) [optional]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
 
+  noc.populationScores
+    name: NOC population score analytics
+    category: NOC
+    support: unsupported
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Missing for support:
+      - noc.populationScores.scoreSeries (noc.populationScores.scoreConsumption) [mandatory]
+        expected: Population score series
+        candidates: noc.populationScores.scoreSeries, scores.population.history, scores.scores.history
+        impact: NOC population analytics cannot build series/distribution output without score history evidence.
+    Missing optional / degraded evidence:
+      - noc.populationScores.currentScores (noc.populationScores.scoreConsumption) [optional]
+        expected: Current score documents
+        candidates: noc.populationScores.current, qoe_cpe_score, qoe_host_wifi_score
+        impact: Population summary is degraded without current score document evidence.
+
   score.cpe.internet
     name: CPE internet score
     category: Score
@@ -122,6 +181,31 @@ Feature Details
         expected: WAN access metric history
         candidates: scores.metrics.history.device.wan.access.ethernet, scores.metrics.history.device.wan.dsl
         impact: WAN access branch support is partial without mapped Ethernet or DSL-speed history.
+
+  score.cpe.overall
+    name: Overall CPE QoE score
+    category: Score
+    support: unsupported
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Missing for support:
+      - score.cpe.overall.child.internet (score.cpe.internet) [mandatory]
+        expected: CPE Internet child score or derivable histories
+        candidates: qoe_cpe_internet_score, scores.scores.current.qoe_cpe_internet_score, score.cpe.internet
+        impact: Overall CPE score needs at least one usable child score path; Internet score evidence is absent.
+      - score.cpe.overall.child.wifi (score.cpe.wifi) [mandatory]
+        expected: CPE Wi-Fi child score or derivable histories
+        candidates: qoe_cpe_wifi_score, scores.scores.current.qoe_cpe_wifi_score, score.cpe.wifi
+        impact: Overall CPE score needs at least one usable child score path; Wi-Fi score evidence is absent.
+    Missing optional / degraded evidence:
+      - score.cpe.overall.dailyHistory (score.qoe.dailyScoreHistory) [optional]
+        expected: Daily score history
+        candidates: scores.scores.history.qoe_cpe_score, scores.scores.history.device
+        impact: Trend and drill-down support is degraded without daily score history.
+      - score.cpe.overall.zeroSemantics (score.qoe.zeroMeansNotAvailable) [optional]
+        expected: Zero-as-not-available score semantics
+        candidates: qoe_cpe_score, scores.scores.current.qoe_cpe_score
+        impact: Score output confidence is lower without current score evidence using the source zero-as-not-available semantics.
 
   score.cpe.wifi
     name: CPE Wi-Fi score
@@ -196,16 +280,31 @@ Feature Details
         impact: Automatic channel choice confidence is degraded without scan-derived scoring evidence.
 
 Runtime Validation Limitations
+  - customerCare.scoreDrilldown: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - customerCare.topologyMap: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - customerCare.wifiSettings: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - diagnostics.speedtest: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - discovery.capabilityScan: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - discovery.platformFeatureScan: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - noc.populationScores: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - score.cpe.internet: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - score.cpe.overall: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - score.cpe.wifi: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - score.host.wifi: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - selfHealing.remoteChannelManagement: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
 
 Source Evidence
+  customerCare.scoreDrilldown
+    - prisme-backend/services/customer-care-agent/src/rest/handler.go:64-64 score routes: Registers CPE score route.
+    - prisme-backend/services/customer-care-agent/src/rest/handler.go:67-67 score routes: Registers host score route.
+    - prisme-backend/services/customer-care-agent/src/rest/scores.go:12-12 device score handler: Defines device score handler.
+    - prisme-backend/services/customer-care-agent/src/services/scores.go:16-16 device score service: Retrieves device score data.
+    - prisme-backend/services/customer-care-agent/src/services/scores.go:92-92 host score service: Retrieves host score data.
+  customerCare.topologyMap
+    - prisme-backend/services/customer-care-agent/src/rest/handler.go:53-53 map routes: Registers customer-care topology map routes.
+    - prisme-backend/services/customer-care-agent/src/services/map.go:12-12 GetCpeMap: Defines topology map service entrypoint.
+    - prisme-backend/services/customer-care-agent/src/services/map.go:27-27 device-service status: Consumes runtime device-service map output.
+    - prisme-backend/services/customer-care-agent/src/services/map_bulk_fallback.go:39-39 bulk fallback: Defines fallback helper with no confirmed active call path.
   customerCare.wifiSettings
     - prisme-backend/services/customer-care-agent/src/rest/handler.go:35-35 management routes: Registers Wi-Fi settings management endpoints.
     - prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:83-83 wifiSuiteApi: Exposes Wi-Fi suite read API.
@@ -230,12 +329,23 @@ Source Evidence
     - prisme-backend/services/discovery-program/src/disc_prog_features_types.py:51-51 RuleSet: Documents ordered rule processing.
     - prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:111-111 GET: Reads direct parameter values.
     - prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:244-244 DataModelHas: Checks data model path presence.
+  noc.populationScores
+    - prisme-backend/services/network-operation-center/src/rest/handler.go:23-23 score routes: Registers NOC score routes.
+    - prisme-backend/services/network-operation-center/src/score/service.go:23-23 score service: Defines NOC score service.
+    - prisme-backend/services/network-operation-center/src/score/service.go:46-46 score series: Reads population score series.
+    - prisme-backend/services/network-operation-center/src/score/service.go:79-79 score distribution: Reads population score distribution.
+    - prisme-backend/services/network-operation-center/src/score/service.go:104-104 score summary: Reads population score summary.
   score.cpe.internet
     - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:642-642 latency_score: Defines Internet latency score calculation.
     - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:672-672 download_score: Defines download score calculation.
     - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:695-695 upload_score: Defines upload score calculation.
     - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:825-825 internet_score: Composes Internet score from latency and performance.
     - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:779-779 wan_access: Implements Ethernet WAN access branch.
+  score.cpe.overall
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:825-825 internet_score: Composes Internet score before overall CPE score.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:828-828 cpe_score: Composes CPE score from Wi-Fi and Internet scores.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:834-834 qoe_cpe_score: Emits overall CPE score.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1165-1165 score_min_ignore_na: Implements zero-as-not-available min semantics.
   score.cpe.wifi
     - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:167-167 network_interference: Calculates CPE Wi-Fi network interference.
     - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:168-168 cpe_wifi_score: Calculates CPE Wi-Fi score with truth-table semantics.

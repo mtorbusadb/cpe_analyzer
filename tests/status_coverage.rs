@@ -37,17 +37,13 @@ fn matched_paths_and_missing_requirements_are_sorted() {
             sorted.sort();
             assert_eq!(matched.matched_paths, sorted, "{}", matched.rule_id);
         }
-        let missing_ids: Vec<_> = feature
-            .missing_mandatory_requirements
-            .iter()
-            .chain(feature.missing_optional_requirements.iter())
-            .chain(feature.missing_control_requirements.iter())
-            .chain(feature.missing_diagnostic_requirements.iter())
-            .map(|missing| missing.rule_id.as_str())
-            .collect();
-        let mut sorted = missing_ids.clone();
-        sorted.sort();
-        assert_eq!(missing_ids, sorted, "{}", feature.feature_id);
+        assert_sorted_missing(&feature.missing_mandatory_requirements, &feature.feature_id);
+        assert_sorted_missing(&feature.missing_optional_requirements, &feature.feature_id);
+        assert_sorted_missing(&feature.missing_control_requirements, &feature.feature_id);
+        assert_sorted_missing(
+            &feature.missing_diagnostic_requirements,
+            &feature.feature_id,
+        );
     }
 }
 
@@ -146,6 +142,61 @@ fn custom_registry_covers_supported_unknown_and_implementation_not_found() {
         report.summary.get("implementationNotFoundFeatures"),
         Some(&1)
     );
+}
+
+#[test]
+fn mapped_score_consumption_features_are_assessed_from_score_evidence() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/score-consumption.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    assert_eq!(
+        feature_status(&report, "score.cpe.overall"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "customerCare.scoreDrilldown"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "noc.populationScores"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "customerCare.topologyMap"),
+        SupportStatus::Partial
+    );
+}
+
+#[test]
+fn expanded_mapped_features_are_present_in_default_report() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/missing-mandatory.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    for feature_id in [
+        "score.cpe.overall",
+        "customerCare.scoreDrilldown",
+        "customerCare.topologyMap",
+        "noc.populationScores",
+    ] {
+        assert!(
+            report
+                .features
+                .iter()
+                .any(|feature| feature.feature_id == feature_id),
+            "missing {feature_id}"
+        );
+    }
+}
+
+fn assert_sorted_missing(missing: &[cpe_analyzer::model::MissingRequirement], feature_id: &str) {
+    let ids: Vec<_> = missing.iter().map(|item| item.rule_id.as_str()).collect();
+    let mut sorted = ids.clone();
+    sorted.sort();
+    assert_eq!(ids, sorted, "{feature_id}");
 }
 
 fn feature_status(report: &cpe_analyzer::model::Report, feature_id: &str) -> SupportStatus {

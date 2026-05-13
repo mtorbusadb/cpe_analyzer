@@ -368,3 +368,28 @@ Phase 2 is complete when:
 ### Next Command
 
 Run `autostep` to execute Phase 2.
+
+## Phase 3 Autostep - Additional Mapped Feature Rows
+
+### Scope
+
+This autostep broadens the default registry with a small set of source-mapped features from `docs/offline-analyzer/feature-parameter-dependencies.md` without adding AQoS workflows yet.
+
+Added features:
+
+- `score.cpe.overall`
+- `customerCare.scoreDrilldown`
+- `customerCare.topologyMap`
+- `noc.populationScores`
+
+### Acceptance Criteria
+
+- The new features appear in the default report.
+- Each new feature has source-code evidence references.
+- Score-consumption fixtures exercise these features without requiring live services.
+- Existing Phase 2 status and determinism tests continue to pass.
+- The full gate from Phase 2 continues to pass.
+
+### Next Command
+
+Run `planlock` before adding AQoS/self-healing workflow expansion, because those features introduce more control/write semantics and should be scoped separately.

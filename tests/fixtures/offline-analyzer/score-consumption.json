@@ -1,0 +1,13 @@
+{
+  "Report": [
+    { "path": "device.declaredDataModel", "kind": "metadata", "value": "TR-181" },
+    { "path": "qoe_cpe_score", "kind": "score", "value": 82 },
+    { "path": "qoe_cpe_wifi_score", "kind": "score", "value": 78 },
+    { "path": "qoe_cpe_internet_score", "kind": "score", "value": 86 },
+    { "path": "qoe_host_wifi_score", "kind": "score", "value": 74 },
+    { "path": "scores.scores.history.qoe_cpe_score", "kind": "history", "value": [80, 82, 81], "window": "7d" },
+    { "path": "noc.populationScores.scoreSeries", "kind": "history", "value": [70, 72, 73], "window": "24h" },
+    { "path": "noc.populationScores.current", "kind": "score", "value": { "supported": 10, "partial": 2 } },
+    { "path": "customerCare.topology.deviceServiceMap", "kind": "derivedMetric", "value": { "nodes": [] } }
+  ]
+}

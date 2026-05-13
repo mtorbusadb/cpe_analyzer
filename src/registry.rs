@@ -33,6 +33,22 @@ pub fn phase1_features() -> Vec<FeatureDefinition> {
             ],
             discovery_feature_refs(),
         ),
+
+        feature(
+            "score.cpe.overall",
+            "Overall CPE QoE score",
+            "Score",
+            EvidenceConfidence::High,
+            false,
+            false,
+            vec![
+                req("score.cpe.overall.child.wifi", "score.cpe.wifi", "CPE Wi-Fi child score or derivable histories", RequirementGroup::Mandatory, MatchMode::Value, vec!["qoe_cpe_wifi_score", "scores.scores.current.qoe_cpe_wifi_score", "score.cpe.wifi"], "Overall CPE score needs at least one usable child score path; Wi-Fi score evidence is absent."),
+                req("score.cpe.overall.child.internet", "score.cpe.internet", "CPE Internet child score or derivable histories", RequirementGroup::Mandatory, MatchMode::Value, vec!["qoe_cpe_internet_score", "scores.scores.current.qoe_cpe_internet_score", "score.cpe.internet"], "Overall CPE score needs at least one usable child score path; Internet score evidence is absent."),
+                req("score.cpe.overall.zeroSemantics", "score.qoe.zeroMeansNotAvailable", "Zero-as-not-available score semantics", RequirementGroup::Optional, MatchMode::Present, vec!["qoe_cpe_score", "scores.scores.current.qoe_cpe_score"], "Score output confidence is lower without current score evidence using the source zero-as-not-available semantics."),
+                req("score.cpe.overall.dailyHistory", "score.qoe.dailyScoreHistory", "Daily score history", RequirementGroup::Optional, MatchMode::History, vec!["scores.scores.history.qoe_cpe_score", "scores.scores.history.device"], "Trend and drill-down support is degraded without daily score history."),
+            ],
+            overall_score_refs(),
+        ),
         feature(
             "score.cpe.wifi",
             "CPE Wi-Fi score",
@@ -109,6 +125,47 @@ pub fn phase1_features() -> Vec<FeatureDefinition> {
                 req("customerCare.wifiSettings.ssid.write", "customerCare.wifi.configurationWrite", "SSID/security write control", RequirementGroup::Control, MatchMode::Writable, vec!["Device.WiFi.SSID.{i}.SSID", "Device.WiFi.AccessPoint.{i}.Security.KeyPassphrase"], "Customer care can display settings but cannot update them."),
             ],
             customer_wifi_refs(),
+        ),
+
+        feature(
+            "customerCare.topologyMap",
+            "Customer-care topology map",
+            "CustomerCare",
+            EvidenceConfidence::High,
+            false,
+            false,
+            vec![
+                req("customerCare.topologyMap.deviceServiceMap", "customerCare.topology.deviceServiceMap", "Topology payload from device service", RequirementGroup::Mandatory, MatchMode::Value, vec!["customerCare.topology.deviceServiceMap", "topology.map", "topology.flatMap"], "Static CPE parameter JSON does not include the runtime topology map payload consumed by customer care."),
+                req("customerCare.topologyMap.bulkFallback", "customerCare.topology.bulkFallback", "Inactive bulk fallback evidence", RequirementGroup::Optional, MatchMode::Value, vec!["customerCare.topology.bulkFallback"], "Bulk fallback code exists but no active call path was confirmed; do not treat it as required support."),
+            ],
+            topology_refs(),
+        ),
+        feature(
+            "customerCare.scoreDrilldown",
+            "Customer-care score drill-down",
+            "CustomerCare",
+            EvidenceConfidence::High,
+            false,
+            false,
+            vec![
+                req("customerCare.scoreDrilldown.deviceScore", "customerCare.scoreDrilldown.scoreConsumption", "Device score document", RequirementGroup::Mandatory, MatchMode::Value, vec!["qoe_cpe_score", "scores.scores.current.qoe_cpe_score", "customerCare.score.device"], "Customer-care score drill-down cannot display device score without score document evidence."),
+                req("customerCare.scoreDrilldown.hostScore", "customerCare.scoreDrilldown.scoreConsumption", "Host score document", RequirementGroup::Optional, MatchMode::Value, vec!["qoe_host_wifi_score", "scores.scores.current.qoe_host_wifi_score", "customerCare.score.host"], "Host drill-down is degraded without host score evidence."),
+                req("customerCare.scoreDrilldown.scoreSeries", "score.qoe.dailyScoreHistory", "Score time series", RequirementGroup::Optional, MatchMode::History, vec!["scores.scores.history", "customerCare.score.series"], "Time-series drill-down is unavailable without score history evidence."),
+            ],
+            score_drilldown_refs(),
+        ),
+        feature(
+            "noc.populationScores",
+            "NOC population score analytics",
+            "NOC",
+            EvidenceConfidence::High,
+            false,
+            false,
+            vec![
+                req("noc.populationScores.scoreSeries", "noc.populationScores.scoreConsumption", "Population score series", RequirementGroup::Mandatory, MatchMode::History, vec!["noc.populationScores.scoreSeries", "scores.population.history", "scores.scores.history"], "NOC population analytics cannot build series/distribution output without score history evidence."),
+                req("noc.populationScores.currentScores", "noc.populationScores.scoreConsumption", "Current score documents", RequirementGroup::Optional, MatchMode::Value, vec!["noc.populationScores.current", "qoe_cpe_score", "qoe_host_wifi_score"], "Population summary is degraded without current score document evidence."),
+            ],
+            noc_population_refs(),
         ),
         feature(
             "diagnostics.speedtest",
@@ -260,6 +317,15 @@ fn discovery_feature_refs() -> Vec<SourceCodeReference> {
     ]
 }
 
+fn overall_score_refs() -> Vec<SourceCodeReference> {
+    vec![
+        src("tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js", 825, "internet_score", "Composes Internet score before overall CPE score."),
+        src("tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js", 828, "cpe_score", "Composes CPE score from Wi-Fi and Internet scores."),
+        src("tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js", 834, "qoe_cpe_score", "Emits overall CPE score."),
+        src("tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js", 1165, "score_min_ignore_na", "Implements zero-as-not-available min semantics."),
+    ]
+}
+
 fn cpe_wifi_score_refs() -> Vec<SourceCodeReference> {
     vec![
         src("tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js", 167, "network_interference", "Calculates CPE Wi-Fi network interference."),
@@ -331,6 +397,105 @@ fn customer_wifi_refs() -> Vec<SourceCodeReference> {
             147,
             "wifiSuiteApi",
             "Exposes Wi-Fi write API.",
+        ),
+    ]
+}
+
+fn topology_refs() -> Vec<SourceCodeReference> {
+    vec![
+        src(
+            "prisme-backend/services/customer-care-agent/src/rest/handler.go",
+            53,
+            "map routes",
+            "Registers customer-care topology map routes.",
+        ),
+        src(
+            "prisme-backend/services/customer-care-agent/src/services/map.go",
+            12,
+            "GetCpeMap",
+            "Defines topology map service entrypoint.",
+        ),
+        src(
+            "prisme-backend/services/customer-care-agent/src/services/map.go",
+            27,
+            "device-service status",
+            "Consumes runtime device-service map output.",
+        ),
+        src(
+            "prisme-backend/services/customer-care-agent/src/services/map_bulk_fallback.go",
+            39,
+            "bulk fallback",
+            "Defines fallback helper with no confirmed active call path.",
+        ),
+    ]
+}
+
+fn score_drilldown_refs() -> Vec<SourceCodeReference> {
+    vec![
+        src(
+            "prisme-backend/services/customer-care-agent/src/rest/handler.go",
+            64,
+            "score routes",
+            "Registers CPE score route.",
+        ),
+        src(
+            "prisme-backend/services/customer-care-agent/src/rest/handler.go",
+            67,
+            "score routes",
+            "Registers host score route.",
+        ),
+        src(
+            "prisme-backend/services/customer-care-agent/src/rest/scores.go",
+            12,
+            "device score handler",
+            "Defines device score handler.",
+        ),
+        src(
+            "prisme-backend/services/customer-care-agent/src/services/scores.go",
+            16,
+            "device score service",
+            "Retrieves device score data.",
+        ),
+        src(
+            "prisme-backend/services/customer-care-agent/src/services/scores.go",
+            92,
+            "host score service",
+            "Retrieves host score data.",
+        ),
+    ]
+}
+
+fn noc_population_refs() -> Vec<SourceCodeReference> {
+    vec![
+        src(
+            "prisme-backend/services/network-operation-center/src/rest/handler.go",
+            23,
+            "score routes",
+            "Registers NOC score routes.",
+        ),
+        src(
+            "prisme-backend/services/network-operation-center/src/score/service.go",
+            23,
+            "score service",
+            "Defines NOC score service.",
+        ),
+        src(
+            "prisme-backend/services/network-operation-center/src/score/service.go",
+            46,
+            "score series",
+            "Reads population score series.",
+        ),
+        src(
+            "prisme-backend/services/network-operation-center/src/score/service.go",
+            79,
+            "score distribution",
+            "Reads population score distribution.",
+        ),
+        src(
+            "prisme-backend/services/network-operation-center/src/score/service.go",
+            104,
+            "score summary",
+            "Reads population score summary.",
         ),
     ]
 }
