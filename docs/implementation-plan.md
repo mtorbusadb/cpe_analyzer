@@ -268,3 +268,103 @@ After Phase 1 is reviewed:
 - Output files should default to no color unless `--color=always` is explicitly requested.
 
 These decisions unblock Phase 1 implementation.
+
+## Phase 2 Locked Plan - Registry Accuracy and Status Coverage
+
+### Scope
+
+Replace the provisional Phase 1 registry with a tighter source-backed registry derived from the existing dependency documents, without broad new PRISME source discovery.
+
+This phase must not expand to every PRISME feature. It focuses on making the current eight Phase 1 features more defensible and testable:
+
+1. `discovery.capabilityScan`
+2. `discovery.platformFeatureScan`
+3. `score.cpe.wifi`
+4. `score.host.wifi`
+5. `score.cpe.internet`
+6. `selfHealing.remoteChannelManagement`
+7. `customerCare.wifiSettings`
+8. `diagnostics.speedtest`
+
+The phase should improve these areas:
+
+- replace placeholder evidence references with specific references from the prepared docs,
+- normalize registry data so source evidence is attached per feature and per requirement where practical,
+- add explicit tests for `supported`, `partial`, `unsupported`, `unknown`, and `implementation_not_found`,
+- add deterministic ordering tests for features, requirements, missing requirements, and matched paths,
+- add TR-181 and TR-098 fixture coverage where mappings are already documented,
+- keep output text as the primary report format.
+
+### Files
+
+Expected files to modify:
+
+- `src/model.rs`
+- `src/registry.rs`
+- `src/evaluator.rs`
+- `src/report.rs`
+- `tests/cli.rs`
+- `tests/fixtures/offline-analyzer/*.json`
+- `docs/offline-analyzer/examples/input-basic.json`
+- `docs/offline-analyzer/examples/output-compatibility-report.txt`
+- `docs/implementation-plan.md`
+
+Optional files if the implementation benefits from separation:
+
+- `src/matcher.rs`
+- `src/status.rs`
+- `tests/registry.rs`
+
+Do not modify unrelated docs or PRISME source repositories in this phase.
+
+### Tests
+
+Add or update tests for:
+
+- feature order is stable by `featureId`,
+- matched paths are stable and sorted,
+- missing requirements are stable and sorted by `ruleId`,
+- `supported` status for a static read/display feature where all mandatory evidence is present and no runtime-only blocker exists,
+- `partial` status caused by runtime validation limitations or missing optional evidence,
+- `unsupported` status caused by missing mandatory evidence,
+- `unsupported` status caused by missing required write/control capability,
+- `unknown` status for a deliberately registered feature with insufficient source/snapshot evidence,
+- `implementation_not_found` status for a deliberately registered feature reference with no implementation dependency evidence,
+- TR-181 fixture behavior,
+- TR-098 fixture behavior only where current mapping docs justify it,
+- no ANSI escape sequences when `--color=never`,
+- ANSI status colors only when `--color=always`.
+
+If `unknown` and `implementation_not_found` require test-only registry entries, keep them isolated from normal Phase 2 output or clearly mark them as test fixtures.
+
+### Commands
+
+Run the full gate before commit:
+
+```bash
+cargo fmt --check
+cargo test
+make test
+cargo run -- --input docs/offline-analyzer/examples/input-basic.json --output out/compatibility-report.txt --color=never
+rg -n "reportFormatVersion|Missing for support|supported|partial|unsupported|unknown|implementation_not_found" out/compatibility-report.txt
+git diff --check
+```
+
+If a command fails because of local toolchain or dependency constraints, fix the implementation if possible. If it cannot be fixed locally, record the exact failing command and failure reason.
+
+### Acceptance Criteria
+
+Phase 2 is complete when:
+
+- the current eight features still appear in the text report,
+- each feature has more specific evidence than the Phase 1 common placeholder evidence,
+- status evaluation covers all allowed support enum values in tests,
+- unsupported features include `Missing for support`,
+- partial features explain degradation or runtime validation limitation,
+- output remains deterministic across repeated runs for the same input,
+- `out/` remains uncommitted,
+- all gate commands pass or any blocked command is explicitly documented.
+
+### Next Command
+
+Run `autostep` to execute Phase 2.

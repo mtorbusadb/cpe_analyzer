@@ -31,23 +31,23 @@ Feature Details
     name: Customer-care Wi-Fi settings
     category: CustomerCare
     support: unsupported
-    evidenceConfidence: medium
+    evidenceConfidence: high
     runtimeValidationRequired: true
     Missing for support:
-      - customerCare.wifiSettings.ap.read (wifi.accessPoint.config) [mandatory]
+      - customerCare.wifiSettings.ap.read (customerCare.wifi.fullTreeRead) [mandatory]
         expected: Access point configuration readable
         candidates: Device.WiFi.AccessPoint.{i}.Enable, Device.WiFi.AccessPoint.{i}.SSIDReference
         impact: Customer care cannot display access point configuration.
-      - customerCare.wifiSettings.security.read (wifi.security.mode) [mandatory]
+      - customerCare.wifiSettings.security.read (customerCare.wifi.apSsidSecuritySettings) [mandatory]
         expected: Security mode readable
         candidates: Device.WiFi.AccessPoint.{i}.Security.ModeEnabled
         impact: Customer care cannot display Wi-Fi security mode.
-      - customerCare.wifiSettings.ssid.read (wifi.ssid.name) [mandatory]
+      - customerCare.wifiSettings.ssid.read (customerCare.wifi.apSsidSecuritySettings) [mandatory]
         expected: SSID name readable
         candidates: Device.WiFi.SSID.{i}.SSID
         impact: Customer care cannot display SSID names.
-      - customerCare.wifiSettings.ssid.write (wifi.ssid.name) [control]
-        expected: SSID write control
+      - customerCare.wifiSettings.ssid.write (customerCare.wifi.configurationWrite) [control]
+        expected: SSID/security write control
         candidates: Device.WiFi.SSID.{i}.SSID, Device.WiFi.AccessPoint.{i}.Security.KeyPassphrase
         impact: Customer care can display settings but cannot update them.
 
@@ -55,16 +55,20 @@ Feature Details
     name: Speed-test diagnostics
     category: Diagnostics
     support: unsupported
-    evidenceConfidence: medium
+    evidenceConfidence: high
     runtimeValidationRequired: true
     Missing for support:
-      - diagnostics.speedtest.download.action (speedtest.download.command) [diagnostic]
-        expected: Download diagnostic action
-        candidates: diagnostics.speedtest.dispatch, Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState
+      - diagnostics.speedtest.dispatch.action (diagnostics.speedtest.dispatch) [diagnostic]
+        expected: Speed-test dispatch action
+        candidates: diagnostics.speedtest.dispatch
+        impact: PRISME cannot trigger the speed-test command path.
+      - diagnostics.speedtest.download.action (diagnostics.speedtest.diagnosticsRequest) [diagnostic]
+        expected: Download diagnostic request path
+        candidates: Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState
         impact: PRISME cannot trigger or observe download diagnostics.
-      - diagnostics.speedtest.upload.action (speedtest.upload.command) [diagnostic]
-        expected: Upload diagnostic action
-        candidates: diagnostics.speedtest.dispatch, Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState
+      - diagnostics.speedtest.upload.action (diagnostics.speedtest.diagnosticsRequest) [diagnostic]
+        expected: Upload diagnostic request path
+        candidates: Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState
         impact: PRISME cannot trigger or observe upload diagnostics.
     Missing optional / degraded evidence:
       - diagnostics.speedtest.results (speedtest.result.values) [optional]
@@ -76,22 +80,23 @@ Feature Details
     name: Discovery capability scan
     category: Discovery
     support: partial
-    evidenceConfidence: medium
+    evidenceConfidence: high
     runtimeValidationRequired: true
     Matched requirements:
       - discovery.capabilityScan.dataModel (discovery.dataModel.family) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels, device.declaredDataModel
-      - discovery.capabilityScan.parameterPresence (discovery.parameter.presence) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
-      - discovery.capabilityScan.parameterValues (discovery.parameter.value) [optional]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
+      - discovery.capabilityScan.parameterPresence (discovery.capability.propertyPresence) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
+      - discovery.capabilityScan.propertySet (discovery.capability.propertySet) [optional]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
 
   discovery.platformFeatureScan
     name: Platform feature scan
     category: Discovery
     support: partial
-    evidenceConfidence: medium
+    evidenceConfidence: high
     runtimeValidationRequired: true
     Matched requirements:
       - discovery.platformFeatureScan.dataModel (discovery.dataModel.family) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels, device.declaredDataModel
-      - discovery.platformFeatureScan.readableEvidence (discovery.parameter.readable) [mandatory]: Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
+      - discovery.platformFeatureScan.pathRule (discovery.feature.dataModelPresenceRule) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
+      - discovery.platformFeatureScan.valueRule (discovery.feature.parameterValueRule) [optional]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
 
   score.cpe.internet
     name: CPE internet score
@@ -100,23 +105,23 @@ Feature Details
     evidenceConfidence: high
     runtimeValidationRequired: true
     Missing for support:
-      - score.cpe.internet.download.history (speedtest.download.throughput.history) [mandatory]
+      - score.cpe.internet.download.history (score.cpe.internet.downloadHistory) [mandatory]
         expected: Download throughput history
         candidates: scores.metrics.history.device.wan.download, Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState
         impact: Internet score cannot calculate download throughput contribution.
-      - score.cpe.internet.latency.history (speedtest.latency.history) [mandatory]
-        expected: Latency history
+      - score.cpe.internet.latency.history (score.cpe.internet.latencyHistory) [mandatory]
+        expected: Latency and packet-loss history
         candidates: scores.metrics.history.device.wan.ping, Device.IP.Diagnostics.IPPing.DiagnosticsState
         impact: Internet score cannot calculate latency contribution.
-      - score.cpe.internet.upload.history (speedtest.upload.throughput.history) [mandatory]
+      - score.cpe.internet.upload.history (score.cpe.internet.uploadHistory) [mandatory]
         expected: Upload throughput history
         candidates: scores.metrics.history.device.wan.upload, Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState
         impact: Internet score cannot calculate upload throughput contribution.
     Missing optional / degraded evidence:
-      - score.cpe.internet.wan.link (wan.interface.status) [optional]
-        expected: WAN link status
-        candidates: Device.Ethernet.Interface.{i}.Status, Device.IP.Interface.{i}.Status
-        impact: Score context is weaker without WAN interface status.
+      - score.cpe.internet.wanAccess.history (score.wan.access.ethernetHistory) [optional]
+        expected: WAN access metric history
+        candidates: scores.metrics.history.device.wan.access.ethernet, scores.metrics.history.device.wan.dsl
+        impact: WAN access branch support is partial without mapped Ethernet or DSL-speed history.
 
   score.cpe.wifi
     name: CPE Wi-Fi score
@@ -125,19 +130,27 @@ Feature Details
     evidenceConfidence: high
     runtimeValidationRequired: true
     Missing for support:
-      - score.cpe.wifi.noise.history (wifi.radio.noise.history) [mandatory]
-        expected: Radio noise history
-        candidates: scores.metrics.history.device.noise, Device.WiFi.Radio.{i}.Stats.Noise
-        impact: CPE Wi-Fi score cannot calculate radio noise contribution.
-      - score.cpe.wifi.utilization.history (wifi.radio.utilization.history) [mandatory]
-        expected: Radio utilization history
-        candidates: scores.metrics.history.device.utilization, Device.WiFi.Radio.{i}.Stats.ChannelUtilization
-        impact: CPE Wi-Fi score cannot calculate utilization contribution.
-    Missing optional / degraded evidence:
-      - score.cpe.wifi.clientSignal.history (wifi.client.rssi.history) [optional]
+      - score.cpe.wifi.clientPhy.history (score.host.wifi.phyRateHistory) [mandatory]
+        expected: Client PHY-rate history
+        candidates: scores.metrics.history.host.downlinkRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataDownlinkRate
+        impact: CPE Wi-Fi score cannot calculate coverage from weighted PHY-rate evidence.
+      - score.cpe.wifi.clientSignal.history (score.host.wifi.rssiHistory) [mandatory]
         expected: Client signal history
         candidates: scores.metrics.history.host.signalStrength, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength
-        impact: Score confidence is lower without client signal distribution.
+        impact: CPE Wi-Fi score cannot calculate coverage from weighted client signal evidence.
+      - score.cpe.wifi.noise.history (score.cpe.wifi.noiseHistory) [mandatory]
+        expected: Radio noise history
+        candidates: scores.metrics.history.device.noise, Device.WiFi.Radio.{i}.Stats.Noise
+        impact: CPE Wi-Fi score cannot calculate network interference noise input.
+      - score.cpe.wifi.utilization.history (score.cpe.wifi.utilizationHistory) [mandatory]
+        expected: Radio utilization history
+        candidates: scores.metrics.history.device.utilization, Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Utilization, Device.WiFi.Radio.{i}.Stats.ChannelUtilization
+        impact: CPE Wi-Fi score cannot calculate network interference utilization input.
+    Missing optional / degraded evidence:
+      - score.cpe.wifi.clientError.history (score.host.wifi.errorRateHistory) [optional]
+        expected: Client error-rate history
+        candidates: scores.metrics.history.host.errorsSentRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.ErrorsSent
+        impact: Score may degrade because traffic/error-rate contribution is missing.
 
   score.host.wifi
     name: Host Wi-Fi score
@@ -146,19 +159,19 @@ Feature Details
     evidenceConfidence: high
     runtimeValidationRequired: true
     Missing for support:
-      - score.host.wifi.phyRate.history (wifi.client.phyRate.history) [mandatory]
-        expected: Client PHY rate history
+      - score.host.wifi.phyRate.history (score.host.wifi.phyRateHistory) [mandatory]
+        expected: Client PHY-rate history
         candidates: scores.metrics.history.host.downlinkRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataDownlinkRate
         impact: Host Wi-Fi score cannot calculate PHY-rate contribution.
-      - score.host.wifi.signal.history (wifi.client.rssi.history) [mandatory]
+      - score.host.wifi.signal.history (score.host.wifi.rssiHistory) [mandatory]
         expected: Client signal strength history
         candidates: scores.metrics.history.host.signalStrength, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength
         impact: Host Wi-Fi score cannot calculate signal contribution.
     Missing optional / degraded evidence:
-      - score.host.wifi.errorRate.history (wifi.client.retryOrError.history) [optional]
+      - score.host.wifi.errorRate.history (score.host.wifi.errorRateHistory) [optional]
         expected: Client retry/error history
-        candidates: scores.metrics.history.host.errorsSentRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Retransmissions
-        impact: Score confidence is lower without retry/error evidence.
+        candidates: scores.metrics.history.host.errorsSentRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.ErrorsSent
+        impact: Host Wi-Fi score can fall back through zero-as-not-available semantics, but traffic confidence is lower.
 
   selfHealing.remoteChannelManagement
     name: Remote channel management
@@ -167,15 +180,20 @@ Feature Details
     evidenceConfidence: high
     runtimeValidationRequired: true
     Matched requirements:
-      - selfHealing.remoteChannelManagement.channel.allowed (wifi.radio.channel.allowedList) [mandatory]: Device.WiFi.Radio.1.PossibleChannels
-      - selfHealing.remoteChannelManagement.channel.current (wifi.radio.channel.current) [mandatory]: Device.WiFi.Radio.1.Channel
-      - selfHealing.remoteChannelManagement.radio.band (wifi.radio.band) [mandatory]: Device.WiFi.Radio.1.OperatingFrequencyBand
-      - selfHealing.remoteChannelManagement.scan.diagnostic (wifi.radio.neighborScan) [diagnostic]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState
+      - selfHealing.remoteChannelManagement.channel.allowed (selfHealing.rcm.radioInventory) [mandatory]: Device.WiFi.Radio.1.PossibleChannels
+      - selfHealing.remoteChannelManagement.channel.current (selfHealing.rcm.currentChannel) [mandatory]: Device.WiFi.Radio.1.Channel
+      - selfHealing.remoteChannelManagement.radio.band (selfHealing.rcm.radioInventory) [mandatory]: Device.WiFi.Radio.1.OperatingFrequencyBand
+      - selfHealing.remoteChannelManagement.scan.diagnostic (selfHealing.rcm.scanDiagnostics) [diagnostic]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState
     Missing for support:
-      - selfHealing.remoteChannelManagement.channel.write (wifi.radio.channel.current) [control]
+      - selfHealing.remoteChannelManagement.channel.write (selfHealing.rcm.channelWrite) [control]
         expected: Writable channel control
         candidates: Device.WiFi.Radio.{i}.Channel, Device.WiFi.Radio.{i}.AutoChannelEnable
         impact: PRISME may recommend a channel but cannot apply channel changes automatically.
+    Missing optional / degraded evidence:
+      - selfHealing.remoteChannelManagement.channel.scoring (selfHealing.rcm.channelScoring) [optional]
+        expected: Scan-derived channel scoring evidence
+        candidates: selfHealing.rcm.scanResult, Device.WiFi.NeighboringWiFiDiagnostic.Result., Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult
+        impact: Automatic channel choice confidence is degraded without scan-derived scoring evidence.
 
 Runtime Validation Limitations
   - customerCare.wifiSettings: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
@@ -189,26 +207,50 @@ Runtime Validation Limitations
 
 Source Evidence
   customerCare.wifiSettings
-    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
-    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+    - prisme-backend/services/customer-care-agent/src/rest/handler.go:35-35 management routes: Registers Wi-Fi settings management endpoints.
+    - prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:83-83 wifiSuiteApi: Exposes Wi-Fi suite read API.
+    - prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:382-382 wifi settings: Reads Wi-Fi AP/SSID/security settings.
+    - prisme-backend/services/customer-care-agent/src/management/wifi_suite/wifi.go:465-465 wifi settings: Handles Wi-Fi setting updates.
+    - prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:147-147 wifiSuiteApi: Exposes Wi-Fi write API.
   diagnostics.speedtest
-    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
-    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+    - prisme-backend/services/customer-care-agent/src/rest/handler.go:32-32 speedtest route: Registers speedtest command route.
+    - prisme-backend/services/customer-care-agent/src/rest/speedtest.go:18-18 speedtest handler: Handles speedtest REST command.
+    - prisme-backend/services/customer-care-agent/src/services/speedtest.go:26-26 speedtest service: Branches on QoE-agent availability.
+    - prisme-backend/services/customer-care-agent/src/services/speedtest.go:38-38 speedtest service: Falls back to diagnostics request path.
+    - prisme-backend/services/customer-care-agent/src/speedtest/diagnostics.go:89-89 diagnostic request: Constructs speedtest diagnostic request.
   discovery.capabilityScan
-    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
-    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+    - prisme-backend/services/discovery-program/src/device_processor.py:111-111 device_processor: Selects TR-181 capability suites.
+    - prisme-backend/services/discovery-program/src/device_processor.py:114-114 device_processor: Selects TR-098 capability suites.
+    - prisme-backend/services/discovery-program/src/disc_prog_capability_types.py:8-8 RequirementType: Defines capability requirement types.
+    - prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:259-259 analyze_property_set: Evaluates nested property sets.
+    - prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:327-327 analyze_module: Computes module support from requirements.
   discovery.platformFeatureScan
-    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
-    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+    - prisme-backend/services/discovery-program/src/device_processor.py:139-139 device_processor: Selects TR-181 platform feature rule sets.
+    - prisme-backend/services/discovery-program/src/device_processor.py:142-142 device_processor: Selects TR-098 platform feature rule sets.
+    - prisme-backend/services/discovery-program/src/disc_prog_features_types.py:51-51 RuleSet: Documents ordered rule processing.
+    - prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:111-111 GET: Reads direct parameter values.
+    - prisme-backend/services/discovery-program/src/disc_prog_features_rule_processor.py:244-244 DataModelHas: Checks data model path presence.
   score.cpe.internet
-    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
-    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:642-642 latency_score: Defines Internet latency score calculation.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:672-672 download_score: Defines download score calculation.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:695-695 upload_score: Defines upload score calculation.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:825-825 internet_score: Composes Internet score from latency and performance.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:779-779 wan_access: Implements Ethernet WAN access branch.
   score.cpe.wifi
-    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
-    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:167-167 network_interference: Calculates CPE Wi-Fi network interference.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:168-168 cpe_wifi_score: Calculates CPE Wi-Fi score with truth-table semantics.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:439-439 weighted_coverage: Uses weighted RSSI/PHY coverage.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:444-444 weighted_traffic: Uses weighted traffic/error-rate contribution.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1196-1196 truth_table: Implements CPE Wi-Fi score composition.
   score.host.wifi
-    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
-    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:382-382 host_coverage: Derives host coverage from RSSI and PHY-rate.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:388-388 host_traffic: Derives host traffic/error score.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:394-394 host_wifi_score: Calculates host Wi-Fi score.
+    - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1232-1232 truth_table: Implements host Wi-Fi score composition.
   selfHealing.remoteChannelManagement
-    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
-    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+    - prisme-backend/services/self-healing/remote-channel-management/src/activities/radio.go:65-65 getRadios: Reads Wi-Fi radio inventory.
+    - prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:31-31 getChannel: Reads current channel.
+    - prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:62-62 setChannel: Writes AutoChannelEnable and Channel.
+    - prisme-backend/services/self-healing/remote-channel-management/src/activities/scan_wifi.go:54-54 scanWiFi: Uses scan diagnostic evidence.
+    - prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:561-561 channelScoring: Uses scan-derived channel scoring.
+    - prisme-backend/services/self-healing/remote-channel-management/src/workflow.go:626-626 applyChannel: Applies chosen channel.

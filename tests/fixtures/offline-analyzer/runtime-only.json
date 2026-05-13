@@ -1,0 +1,8 @@
+{
+  "Report": [
+    { "path": "device.declaredDataModel", "kind": "metadata", "value": "TR-181" },
+    { "path": "diagnostics.speedtest.dispatch", "kind": "diagnostic", "value": "available", "available": true, "commandable": true },
+    { "path": "Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState", "kind": "diagnostic", "value": "None", "available": true, "commandable": true },
+    { "path": "Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState", "kind": "diagnostic", "value": "None", "available": true, "commandable": true }
+  ]
+}

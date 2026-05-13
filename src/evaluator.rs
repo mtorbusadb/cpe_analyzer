@@ -6,7 +6,11 @@ use crate::registry::phase1_features;
 use std::collections::BTreeMap;
 
 pub fn evaluate(snapshot: &Snapshot) -> Report {
-    let mut features: Vec<_> = phase1_features()
+    evaluate_definitions(snapshot, &phase1_features())
+}
+
+pub fn evaluate_definitions(snapshot: &Snapshot, definitions: &[FeatureDefinition]) -> Report {
+    let mut features: Vec<_> = definitions
         .iter()
         .map(|f| assess_feature(snapshot, f))
         .collect();
@@ -46,6 +50,32 @@ fn count(features: &[FeatureAssessment], status: SupportStatus) -> usize {
 }
 
 fn assess_feature(snapshot: &Snapshot, feature: &FeatureDefinition) -> FeatureAssessment {
+    if !feature.implementation_found || feature.requirements.is_empty() {
+        let support = if feature.implementation_found {
+            SupportStatus::Unknown
+        } else {
+            SupportStatus::ImplementationNotFound
+        };
+        return FeatureAssessment {
+            feature_id: feature.feature_id.to_string(),
+            feature_name: feature.feature_name.to_string(),
+            category: feature.category.to_string(),
+            support,
+            evidence_confidence: feature.confidence,
+            runtime_validation_required: feature.runtime_validation_required,
+            matched_requirements: Vec::new(),
+            missing_mandatory_requirements: Vec::new(),
+            missing_optional_requirements: Vec::new(),
+            missing_control_requirements: Vec::new(),
+            missing_diagnostic_requirements: Vec::new(),
+            limitations: feature
+                .limitations
+                .iter()
+                .map(|s| (*s).to_string())
+                .collect(),
+            source_refs: feature.source_refs.clone(),
+        };
+    }
     let mut matched = Vec::new();
     let mut missing_mandatory = Vec::new();
     let mut missing_optional = Vec::new();
