@@ -261,8 +261,10 @@ After Phase 1 is reviewed:
 - Add optional JSON secondary output only if useful.
 - Improve example reports and documentation.
 
-## Open Decisions Before Phase 1 Implementation
+## Phase 1 Implementation Decisions
 
-- Confirm Rust CLI is acceptable for this repository.
-- Confirm whether `clap` is allowed or whether argument parsing should be dependency-free.
-- Confirm whether output files should always be uncolored unless explicitly forced with `--color=always`.
+- Rust CLI is approved for this repository.
+- `clap` is approved for command-line argument parsing.
+- Output files should default to no color unless `--color=always` is explicitly requested.
+
+These decisions unblock Phase 1 implementation.
