@@ -393,3 +393,115 @@ Added features:
 ### Next Command
 
 Run `planlock` before adding AQoS/self-healing workflow expansion, because those features introduce more control/write semantics and should be scoped separately.
+
+## Phase 4 Locked Plan - AQoS Self-Healing Workflow Expansion
+
+### Scope
+
+Add the remaining source-mapped AQoS self-healing workflow features from `docs/offline-analyzer/feature-parameter-dependencies.md` to the default analyzer registry.
+
+Implement exactly these feature IDs in this phase:
+
+1. `selfHealing.aqosDynamicPrioritization`
+2. `selfHealing.aqosAirtimeFairnessTuning`
+3. `selfHealing.aqosRtsCtsThresholdTuning`
+
+Do not add new broad feature families in this phase.
+Do not inspect or modify PRISME source repositories.
+Use the existing prepared docs as source of truth.
+
+### Feature Semantics To Preserve
+
+- All three AQoS features are automatic self-healing workflows and must keep `runtimeValidationRequired: true`.
+- Static JSON may prove data model/control capability, score/history evidence, and associated-device evidence.
+- Static JSON must not claim that runtime workflow execution, cooldown behavior, score freshness, OpenSearch query success, or firmware write acceptance is proven.
+- Missing required control/write capability must make the automatic workflow `unsupported`.
+- Missing history/telemetry should produce `unsupported` when mandatory, or `partial` when optional/degrading.
+
+### Files
+
+Expected files to modify:
+
+- `src/registry.rs`
+- `tests/status_coverage.rs`
+- `tests/fixtures/offline-analyzer/*.json`
+- `docs/offline-analyzer/examples/output-compatibility-report.txt`
+- `docs/implementation-plan.md`
+
+Optional only if needed:
+
+- `src/evaluator.rs`
+- `src/model.rs`
+
+Do not change CLI behavior or output format in this phase.
+
+### Registry Requirements
+
+`selfHealing.aqosDynamicPrioritization` must include:
+
+- mandatory associated device evidence: `selfHealing.qos.associatedDevices`,
+- mandatory score telemetry evidence: `selfHealing.qos.scoreTelemetry`,
+- optional host traffic evidence: `selfHealing.qos.hostTrafficTelemetry`,
+- required control evidence: `selfHealing.qos.priorityControl`,
+- source references from `device_prioritization.go` and `activities/prioritize.go`.
+
+`selfHealing.aqosAirtimeFairnessTuning` must include:
+
+- mandatory associated device evidence: `selfHealing.qos.associatedDevices`,
+- mandatory host traffic evidence: `selfHealing.qos.hostTrafficTelemetry`,
+- optional prioritization state/control evidence: `selfHealing.qos.priorityControl`,
+- required control evidence: `selfHealing.qos.atfControl`,
+- source references from `airtime_fairness.go` and `activities/atf.go`.
+
+`selfHealing.aqosRtsCtsThresholdTuning` must include:
+
+- mandatory associated device evidence: `selfHealing.qos.associatedDevices`,
+- mandatory score telemetry evidence: `selfHealing.qos.scoreTelemetry`,
+- mandatory host traffic/packet evidence: `selfHealing.qos.hostTrafficTelemetry`,
+- mandatory collision metric evidence: `selfHealing.qos.collisionMetrics`,
+- required control evidence: `selfHealing.qos.rtsCtsControl`,
+- source references from `collision_tuning.go` and `activities/collision.go`.
+
+### Tests
+
+Add or update tests for:
+
+- all three AQoS features appear in the default report,
+- a fixture with associated devices, score histories, host traffic, and write/control metadata makes AQoS features `partial` because runtime validation remains required,
+- a fixture with telemetry but read-only/missing control metadata makes automatic AQoS workflows `unsupported`,
+- missing mandatory telemetry remains `unsupported`,
+- source references for AQoS features are source-code paths with line numbers,
+- deterministic feature ordering still holds.
+
+Recommended new fixtures:
+
+- `tests/fixtures/offline-analyzer/aqos-control-supported.json`
+- `tests/fixtures/offline-analyzer/aqos-read-only-control.json`
+
+### Commands
+
+Run the full gate before commit:
+
+```bash
+cargo fmt --check
+cargo test
+make test
+cargo run -- --input docs/offline-analyzer/examples/input-basic.json --output out/compatibility-report.txt --color=never
+rg -n "reportFormatVersion|Missing for support|supported|partial|unsupported|unknown|implementation_not_found" out/compatibility-report.txt
+git diff --check
+```
+
+### Acceptance Criteria
+
+Phase 4 is complete when:
+
+- the three AQoS feature IDs appear in the default text report,
+- each AQoS feature includes source-code evidence paths and line numbers,
+- each AQoS feature distinguishes telemetry/read support from required control/write support,
+- automatic AQoS features are not reported as fully runtime-supported from static JSON alone,
+- tests cover partial runtime-limited AQoS support and unsupported missing-control AQoS support,
+- all gate commands pass.
+
+### Next Command
+
+Run `autostep` to execute Phase 4.

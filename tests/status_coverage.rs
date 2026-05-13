@@ -192,6 +192,99 @@ fn expanded_mapped_features_are_present_in_default_report() {
     }
 }
 
+#[test]
+fn aqos_features_are_present_in_default_report() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/missing-mandatory.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    for feature_id in [
+        "selfHealing.aqosDynamicPrioritization",
+        "selfHealing.aqosAirtimeFairnessTuning",
+        "selfHealing.aqosRtsCtsThresholdTuning",
+    ] {
+        assert!(
+            report
+                .features
+                .iter()
+                .any(|feature| feature.feature_id == feature_id),
+            "missing {feature_id}"
+        );
+    }
+}
+
+#[test]
+fn aqos_control_supported_snapshot_is_partial_due_to_runtime_validation() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/aqos-control-supported.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    for feature_id in [
+        "selfHealing.aqosDynamicPrioritization",
+        "selfHealing.aqosAirtimeFairnessTuning",
+        "selfHealing.aqosRtsCtsThresholdTuning",
+    ] {
+        assert_eq!(
+            feature_status(&report, feature_id),
+            SupportStatus::Partial,
+            "{feature_id}"
+        );
+    }
+}
+
+#[test]
+fn aqos_read_only_control_snapshot_is_unsupported_for_automatic_workflows() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/aqos-read-only-control.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    for feature_id in [
+        "selfHealing.aqosDynamicPrioritization",
+        "selfHealing.aqosAirtimeFairnessTuning",
+        "selfHealing.aqosRtsCtsThresholdTuning",
+    ] {
+        let feature = report
+            .features
+            .iter()
+            .find(|feature| feature.feature_id == feature_id)
+            .unwrap();
+        assert_eq!(feature.support, SupportStatus::Unsupported, "{feature_id}");
+        assert!(
+            !feature.missing_control_requirements.is_empty(),
+            "{feature_id}"
+        );
+    }
+}
+
+#[test]
+fn aqos_features_have_source_references_with_line_numbers() {
+    for feature in phase1_features()
+        .into_iter()
+        .filter(|feature| feature.feature_id.starts_with("selfHealing.aqos"))
+    {
+        assert!(!feature.source_refs.is_empty(), "{}", feature.feature_id);
+        assert!(
+            feature
+                .source_refs
+                .iter()
+                .all(|source| source.line_start.is_some()),
+            "{}",
+            feature.feature_id
+        );
+        assert!(
+            feature
+                .source_refs
+                .iter()
+                .all(|source| source.file.contains("quality-of-service")),
+            "{}",
+            feature.feature_id
+        );
+    }
+}
+
 fn assert_sorted_missing(missing: &[cpe_analyzer::model::MissingRequirement], feature_id: &str) {
     let ids: Vec<_> = missing.iter().map(|item| item.rule_id.as_str()).collect();
     let mut sorted = ids.clone();

@@ -12,7 +12,7 @@ Device
 Summary
   supportedFeatures: 0
   partialFeatures: 2
-  unsupportedFeatures: 10
+  unsupportedFeatures: 13
   unknownFeatures: 0
   implementationNotFoundFeatures: 0
 
@@ -28,6 +28,9 @@ Feature Matrix
   - unsupported              score.cpe.overall                          Overall CPE QoE score
   - unsupported              score.cpe.wifi                             CPE Wi-Fi score
   - unsupported              score.host.wifi                            Host Wi-Fi score
+  - unsupported              selfHealing.aqosAirtimeFairnessTuning      AQoS airtime fairness tuning
+  - unsupported              selfHealing.aqosDynamicPrioritization      AQoS dynamic device-aware prioritization
+  - unsupported              selfHealing.aqosRtsCtsThresholdTuning      AQoS RTS/CTS threshold tuning
   - unsupported              selfHealing.remoteChannelManagement        Remote channel management
 
 Feature Details
@@ -257,6 +260,84 @@ Feature Details
         candidates: scores.metrics.history.host.errorsSentRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.ErrorsSent
         impact: Host Wi-Fi score can fall back through zero-as-not-available semantics, but traffic confidence is lower.
 
+  selfHealing.aqosAirtimeFairnessTuning
+    name: AQoS airtime fairness tuning
+    category: SelfHealing
+    support: unsupported
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Missing for support:
+      - selfHealing.aqosAirtimeFairnessTuning.associatedDevices (selfHealing.qos.associatedDevices) [mandatory]
+        expected: Associated device and client type evidence
+        candidates: Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.MACAddress, selfHealing.qos.associatedDevices
+        impact: Airtime fairness tuning cannot identify station targets without associated-device evidence.
+      - selfHealing.aqosAirtimeFairnessTuning.hostTraffic (selfHealing.qos.hostTrafficTelemetry) [mandatory]
+        expected: Host traffic telemetry
+        candidates: selfHealing.qos.hostTrafficTelemetry, scores.metrics.history.host.traffic
+        impact: Airtime fairness tuning cannot identify greedy or legacy traffic candidates without traffic history.
+      - selfHealing.aqosAirtimeFairnessTuning.atfControl (selfHealing.qos.atfControl) [control]
+        expected: Airtime fairness write control
+        candidates: Device.WiFi.SSID.{i}.X_ADB_AirTimeFairnessEnable, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.X_ADB_AirTimeFairness, selfHealing.qos.atfControl
+        impact: AQoS may identify ATF candidates but cannot automatically apply station or SSID airtime fairness settings.
+    Missing optional / degraded evidence:
+      - selfHealing.aqosAirtimeFairnessTuning.priorityState (selfHealing.qos.priorityControl) [optional]
+        expected: Prioritized-host state/control evidence
+        candidates: Device.QoS.Classification., selfHealing.qos.priorityControl
+        impact: Greedy-client candidate filtering is degraded without prioritization-state/control evidence.
+
+  selfHealing.aqosDynamicPrioritization
+    name: AQoS dynamic device-aware prioritization
+    category: SelfHealing
+    support: unsupported
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Missing for support:
+      - selfHealing.aqosDynamicPrioritization.associatedDevices (selfHealing.qos.associatedDevices) [mandatory]
+        expected: Associated device and AP/radio relationship evidence
+        candidates: Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.MACAddress, selfHealing.qos.associatedDevices
+        impact: AQoS cannot select clients without associated-device and MAC/AP evidence.
+      - selfHealing.aqosDynamicPrioritization.scoreTelemetry (selfHealing.qos.scoreTelemetry) [mandatory]
+        expected: Rolling host/CPE Wi-Fi score telemetry
+        candidates: selfHealing.qos.scoreTelemetry, scores.scores.history.host.wifi, scores.scores.history.device.wifi, scores.metrics.history.host.wifiTrafficScore
+        impact: AQoS prioritization cannot evaluate score gates without rolling score telemetry.
+      - selfHealing.aqosDynamicPrioritization.priorityControl (selfHealing.qos.priorityControl) [control]
+        expected: QoS classification and WMM write control
+        candidates: Device.QoS.Classification., Device.WiFi.AccessPoint.{i}.WMMEnable, selfHealing.qos.priorityControl
+        impact: AQoS may identify clients but cannot automatically apply WMM/QoS prioritization.
+    Missing optional / degraded evidence:
+      - selfHealing.aqosDynamicPrioritization.hostTraffic (selfHealing.qos.hostTrafficTelemetry) [optional]
+        expected: Host traffic ordering telemetry
+        candidates: selfHealing.qos.hostTrafficTelemetry, scores.metrics.history.host.traffic
+        impact: Client ordering and prioritization precision are degraded without host traffic history.
+
+  selfHealing.aqosRtsCtsThresholdTuning
+    name: AQoS RTS/CTS threshold tuning
+    category: SelfHealing
+    support: unsupported
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Missing for support:
+      - selfHealing.aqosRtsCtsThresholdTuning.associatedDevices (selfHealing.qos.associatedDevices) [mandatory]
+        expected: Associated device grouped-by-radio evidence
+        candidates: Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.MACAddress, selfHealing.qos.associatedDevices
+        impact: RTS/CTS tuning cannot group clients by radio without associated-device evidence.
+      - selfHealing.aqosRtsCtsThresholdTuning.collisionMetrics (selfHealing.qos.collisionMetrics) [mandatory]
+        expected: Collision/error-rate metrics
+        candidates: selfHealing.qos.collisionMetrics, scores.metrics.history.radio.collision, scores.metrics.history.host.packetErrorRate
+        impact: RTS/CTS tuning cannot decide threshold mode without collision/error metrics.
+      - selfHealing.aqosRtsCtsThresholdTuning.hostTraffic (selfHealing.qos.hostTrafficTelemetry) [mandatory]
+        expected: Host traffic and packet telemetry
+        candidates: selfHealing.qos.hostTrafficTelemetry, scores.metrics.history.host.traffic, scores.metrics.history.host.packets
+        impact: RTS/CTS tuning cannot calculate traffic and packet activity without telemetry history.
+      - selfHealing.aqosRtsCtsThresholdTuning.scoreTelemetry (selfHealing.qos.scoreTelemetry) [mandatory]
+        expected: Host RSSI/score telemetry
+        candidates: selfHealing.qos.scoreTelemetry, scores.scores.history.host.wifi, scores.metrics.history.host.rssiScore
+        impact: RTS/CTS tuning cannot filter candidate clients without score telemetry.
+      - selfHealing.aqosRtsCtsThresholdTuning.rtsCtsControl (selfHealing.qos.rtsCtsControl) [control]
+        expected: RTS/CTS threshold write control
+        candidates: Device.WiFi.Radio.{i}.X_ADB_RTSCTS_Threshold, Device.WiFi.Radio.{i}.X_ADB_RetryLimit, selfHealing.qos.rtsCtsControl
+        impact: AQoS may detect collision conditions but cannot automatically apply RTS/CTS threshold tuning.
+
   selfHealing.remoteChannelManagement
     name: Remote channel management
     category: SelfHealing
@@ -291,6 +372,9 @@ Runtime Validation Limitations
   - score.cpe.overall: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - score.cpe.wifi: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - score.host.wifi: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - selfHealing.aqosAirtimeFairnessTuning: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - selfHealing.aqosDynamicPrioritization: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - selfHealing.aqosRtsCtsThresholdTuning: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
   - selfHealing.remoteChannelManagement: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
 
 Source Evidence
@@ -357,6 +441,28 @@ Source Evidence
     - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:388-388 host_traffic: Derives host traffic/error score.
     - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:394-394 host_wifi_score: Calculates host Wi-Fi score.
     - tss/services/report-parser/src/main/resources/poc/javascript/default/aggr/sampling/qoe_scores_calculation.js:1232-1232 truth_table: Implements host Wi-Fi score composition.
+  selfHealing.aqosAirtimeFairnessTuning
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:190-190 associated devices: Reads associated devices for ATF candidates.
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:199-199 prioritized hosts: Reads prioritized host list.
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:288-288 legacy ATF: Applies legacy-client ATF.
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go:523-523 host traffic: Reads host traffic for ATF ordering.
+    - prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go:37-37 SetAtf: Enables airtime fairness.
+    - prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go:44-44 station ATF: Builds per-station ATF key.
+  selfHealing.aqosDynamicPrioritization
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:83-83 host traffic score: Reads rolling host Wi-Fi traffic score.
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:111-111 host coverage score: Reads rolling host Wi-Fi coverage score.
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:151-151 host traffic: Reads host traffic for importance ordering.
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go:263-263 PrioritizeTraffic: Executes traffic prioritization.
+    - prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:80-80 WMM: Enables WMM on the touched access point.
+    - prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go:98-98 QoS classification: Adds QoS classification objects.
+  selfHealing.aqosRtsCtsThresholdTuning
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:209-209 threshold setting: Wraps RTS/CTS threshold setting.
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:482-482 radio metrics: Collects radio metrics.
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:502-502 host RSSI: Checks host RSSI score.
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:512-512 host traffic: Reads host traffic.
+    - prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go:524-524 host packets: Reads host packet activity.
+    - prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:23-23 RTS threshold: Writes RTS threshold.
+    - prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go:30-30 radio write: Sends radio write request.
   selfHealing.remoteChannelManagement
     - prisme-backend/services/self-healing/remote-channel-management/src/activities/radio.go:65-65 getRadios: Reads Wi-Fi radio inventory.
     - prisme-backend/services/self-healing/remote-channel-management/src/activities/channel.go:31-31 getChannel: Reads current channel.

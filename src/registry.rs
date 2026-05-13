@@ -111,6 +111,53 @@ pub fn phase1_features() -> Vec<FeatureDefinition> {
             ],
             rcm_refs(),
         ),
+
+        feature(
+            "selfHealing.aqosDynamicPrioritization",
+            "AQoS dynamic device-aware prioritization",
+            "SelfHealing",
+            EvidenceConfidence::High,
+            true,
+            false,
+            vec![
+                req("selfHealing.aqosDynamicPrioritization.associatedDevices", "selfHealing.qos.associatedDevices", "Associated device and AP/radio relationship evidence", RequirementGroup::Mandatory, MatchMode::Value, vec!["Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.MACAddress", "selfHealing.qos.associatedDevices"], "AQoS cannot select clients without associated-device and MAC/AP evidence."),
+                req("selfHealing.aqosDynamicPrioritization.scoreTelemetry", "selfHealing.qos.scoreTelemetry", "Rolling host/CPE Wi-Fi score telemetry", RequirementGroup::Mandatory, MatchMode::History, vec!["selfHealing.qos.scoreTelemetry", "scores.scores.history.host.wifi", "scores.scores.history.device.wifi", "scores.metrics.history.host.wifiTrafficScore"], "AQoS prioritization cannot evaluate score gates without rolling score telemetry."),
+                req("selfHealing.aqosDynamicPrioritization.hostTraffic", "selfHealing.qos.hostTrafficTelemetry", "Host traffic ordering telemetry", RequirementGroup::Optional, MatchMode::History, vec!["selfHealing.qos.hostTrafficTelemetry", "scores.metrics.history.host.traffic"], "Client ordering and prioritization precision are degraded without host traffic history."),
+                req("selfHealing.aqosDynamicPrioritization.priorityControl", "selfHealing.qos.priorityControl", "QoS classification and WMM write control", RequirementGroup::Control, MatchMode::Writable, vec!["Device.QoS.Classification.", "Device.WiFi.AccessPoint.{i}.WMMEnable", "selfHealing.qos.priorityControl"], "AQoS may identify clients but cannot automatically apply WMM/QoS prioritization."),
+            ],
+            aqos_prioritization_refs(),
+        ),
+        feature(
+            "selfHealing.aqosAirtimeFairnessTuning",
+            "AQoS airtime fairness tuning",
+            "SelfHealing",
+            EvidenceConfidence::High,
+            true,
+            false,
+            vec![
+                req("selfHealing.aqosAirtimeFairnessTuning.associatedDevices", "selfHealing.qos.associatedDevices", "Associated device and client type evidence", RequirementGroup::Mandatory, MatchMode::Value, vec!["Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.MACAddress", "selfHealing.qos.associatedDevices"], "Airtime fairness tuning cannot identify station targets without associated-device evidence."),
+                req("selfHealing.aqosAirtimeFairnessTuning.hostTraffic", "selfHealing.qos.hostTrafficTelemetry", "Host traffic telemetry", RequirementGroup::Mandatory, MatchMode::History, vec!["selfHealing.qos.hostTrafficTelemetry", "scores.metrics.history.host.traffic"], "Airtime fairness tuning cannot identify greedy or legacy traffic candidates without traffic history."),
+                req("selfHealing.aqosAirtimeFairnessTuning.priorityState", "selfHealing.qos.priorityControl", "Prioritized-host state/control evidence", RequirementGroup::Optional, MatchMode::Writable, vec!["Device.QoS.Classification.", "selfHealing.qos.priorityControl"], "Greedy-client candidate filtering is degraded without prioritization-state/control evidence."),
+                req("selfHealing.aqosAirtimeFairnessTuning.atfControl", "selfHealing.qos.atfControl", "Airtime fairness write control", RequirementGroup::Control, MatchMode::Writable, vec!["Device.WiFi.SSID.{i}.X_ADB_AirTimeFairnessEnable", "Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.X_ADB_AirTimeFairness", "selfHealing.qos.atfControl"], "AQoS may identify ATF candidates but cannot automatically apply station or SSID airtime fairness settings."),
+            ],
+            aqos_atf_refs(),
+        ),
+        feature(
+            "selfHealing.aqosRtsCtsThresholdTuning",
+            "AQoS RTS/CTS threshold tuning",
+            "SelfHealing",
+            EvidenceConfidence::High,
+            true,
+            false,
+            vec![
+                req("selfHealing.aqosRtsCtsThresholdTuning.associatedDevices", "selfHealing.qos.associatedDevices", "Associated device grouped-by-radio evidence", RequirementGroup::Mandatory, MatchMode::Value, vec!["Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.MACAddress", "selfHealing.qos.associatedDevices"], "RTS/CTS tuning cannot group clients by radio without associated-device evidence."),
+                req("selfHealing.aqosRtsCtsThresholdTuning.scoreTelemetry", "selfHealing.qos.scoreTelemetry", "Host RSSI/score telemetry", RequirementGroup::Mandatory, MatchMode::History, vec!["selfHealing.qos.scoreTelemetry", "scores.scores.history.host.wifi", "scores.metrics.history.host.rssiScore"], "RTS/CTS tuning cannot filter candidate clients without score telemetry."),
+                req("selfHealing.aqosRtsCtsThresholdTuning.hostTraffic", "selfHealing.qos.hostTrafficTelemetry", "Host traffic and packet telemetry", RequirementGroup::Mandatory, MatchMode::History, vec!["selfHealing.qos.hostTrafficTelemetry", "scores.metrics.history.host.traffic", "scores.metrics.history.host.packets"], "RTS/CTS tuning cannot calculate traffic and packet activity without telemetry history."),
+                req("selfHealing.aqosRtsCtsThresholdTuning.collisionMetrics", "selfHealing.qos.collisionMetrics", "Collision/error-rate metrics", RequirementGroup::Mandatory, MatchMode::History, vec!["selfHealing.qos.collisionMetrics", "scores.metrics.history.radio.collision", "scores.metrics.history.host.packetErrorRate"], "RTS/CTS tuning cannot decide threshold mode without collision/error metrics."),
+                req("selfHealing.aqosRtsCtsThresholdTuning.rtsCtsControl", "selfHealing.qos.rtsCtsControl", "RTS/CTS threshold write control", RequirementGroup::Control, MatchMode::Writable, vec!["Device.WiFi.Radio.{i}.X_ADB_RTSCTS_Threshold", "Device.WiFi.Radio.{i}.X_ADB_RetryLimit", "selfHealing.qos.rtsCtsControl"], "AQoS may detect collision conditions but cannot automatically apply RTS/CTS threshold tuning."),
+            ],
+            aqos_rts_refs(),
+        ),
         feature(
             "customerCare.wifiSettings",
             "Customer-care Wi-Fi settings",
@@ -363,6 +410,40 @@ fn rcm_refs() -> Vec<SourceCodeReference> {
         src("prisme-backend/services/self-healing/remote-channel-management/src/activities/scan_wifi.go", 54, "scanWiFi", "Uses scan diagnostic evidence."),
         src("prisme-backend/services/self-healing/remote-channel-management/src/workflow.go", 561, "channelScoring", "Uses scan-derived channel scoring."),
         src("prisme-backend/services/self-healing/remote-channel-management/src/workflow.go", 626, "applyChannel", "Applies chosen channel."),
+    ]
+}
+
+fn aqos_prioritization_refs() -> Vec<SourceCodeReference> {
+    vec![
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go", 83, "host traffic score", "Reads rolling host Wi-Fi traffic score."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go", 111, "host coverage score", "Reads rolling host Wi-Fi coverage score."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go", 151, "host traffic", "Reads host traffic for importance ordering."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/device_prioritization.go", 263, "PrioritizeTraffic", "Executes traffic prioritization."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go", 80, "WMM", "Enables WMM on the touched access point."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/activities/prioritize.go", 98, "QoS classification", "Adds QoS classification objects."),
+    ]
+}
+
+fn aqos_atf_refs() -> Vec<SourceCodeReference> {
+    vec![
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go", 190, "associated devices", "Reads associated devices for ATF candidates."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go", 199, "prioritized hosts", "Reads prioritized host list."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go", 288, "legacy ATF", "Applies legacy-client ATF."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/airtime_fairness.go", 523, "host traffic", "Reads host traffic for ATF ordering."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go", 37, "SetAtf", "Enables airtime fairness."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/activities/atf.go", 44, "station ATF", "Builds per-station ATF key."),
+    ]
+}
+
+fn aqos_rts_refs() -> Vec<SourceCodeReference> {
+    vec![
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go", 209, "threshold setting", "Wraps RTS/CTS threshold setting."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go", 482, "radio metrics", "Collects radio metrics."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go", 502, "host RSSI", "Checks host RSSI score."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go", 512, "host traffic", "Reads host traffic."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/workflows/collision_tuning.go", 524, "host packets", "Reads host packet activity."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go", 23, "RTS threshold", "Writes RTS threshold."),
+        src("prisme-backend/services/self-healing/quality-of-service/src/activities/collision.go", 30, "radio write", "Sends radio write request."),
     ]
 }
 
