@@ -1,0 +1,5 @@
+{
+  "Report": [
+    { "path": "device.vendor", "kind": "metadata", "value": "ExampleVendor" }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "Report": [
+    { "path": "device.declaredDataModel", "kind": "metadata", "value": "TR-181" },
+    { "path": "Device.WiFi.Radio.1.OperatingFrequencyBand", "value": "2.4GHz", "readable": true },
+    { "path": "Device.WiFi.Radio.1.PossibleChannels", "value": "1,6,11", "readable": true },
+    { "path": "Device.WiFi.Radio.1.Channel", "value": 6, "readable": true, "writable": false },
+    { "path": "Device.WiFi.Radio.1.AutoChannelEnable", "value": false, "readable": true, "writable": false },
+    { "path": "Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState", "kind": "diagnostic", "value": "None", "available": true, "commandable": true }
+  ]
+}

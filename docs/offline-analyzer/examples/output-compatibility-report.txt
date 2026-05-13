@@ -1,0 +1,214 @@
+PRISME Offline CPE Compatibility Report
+reportFormatVersion: 1
+assessmentBasis: staticDataModelSnapshot
+
+Device
+  vendor: unknown
+  model: unknown
+  firmwareVersion: unknown
+  declaredDataModel: TR-181
+  detectedDataModel: TR-181
+
+Summary
+  supportedFeatures: 0
+  partialFeatures: 2
+  unsupportedFeatures: 6
+  unknownFeatures: 0
+  implementationNotFoundFeatures: 0
+
+Feature Matrix
+  - unsupported              customerCare.wifiSettings                  Customer-care Wi-Fi settings
+  - unsupported              diagnostics.speedtest                      Speed-test diagnostics
+  - partial                  discovery.capabilityScan                   Discovery capability scan
+  - partial                  discovery.platformFeatureScan              Platform feature scan
+  - unsupported              score.cpe.internet                         CPE internet score
+  - unsupported              score.cpe.wifi                             CPE Wi-Fi score
+  - unsupported              score.host.wifi                            Host Wi-Fi score
+  - unsupported              selfHealing.remoteChannelManagement        Remote channel management
+
+Feature Details
+  customerCare.wifiSettings
+    name: Customer-care Wi-Fi settings
+    category: CustomerCare
+    support: unsupported
+    evidenceConfidence: medium
+    runtimeValidationRequired: true
+    Missing for support:
+      - customerCare.wifiSettings.ap.read (wifi.accessPoint.config) [mandatory]
+        expected: Access point configuration readable
+        candidates: Device.WiFi.AccessPoint.{i}.Enable, Device.WiFi.AccessPoint.{i}.SSIDReference
+        impact: Customer care cannot display access point configuration.
+      - customerCare.wifiSettings.security.read (wifi.security.mode) [mandatory]
+        expected: Security mode readable
+        candidates: Device.WiFi.AccessPoint.{i}.Security.ModeEnabled
+        impact: Customer care cannot display Wi-Fi security mode.
+      - customerCare.wifiSettings.ssid.read (wifi.ssid.name) [mandatory]
+        expected: SSID name readable
+        candidates: Device.WiFi.SSID.{i}.SSID
+        impact: Customer care cannot display SSID names.
+      - customerCare.wifiSettings.ssid.write (wifi.ssid.name) [control]
+        expected: SSID write control
+        candidates: Device.WiFi.SSID.{i}.SSID, Device.WiFi.AccessPoint.{i}.Security.KeyPassphrase
+        impact: Customer care can display settings but cannot update them.
+
+  diagnostics.speedtest
+    name: Speed-test diagnostics
+    category: Diagnostics
+    support: unsupported
+    evidenceConfidence: medium
+    runtimeValidationRequired: true
+    Missing for support:
+      - diagnostics.speedtest.download.action (speedtest.download.command) [diagnostic]
+        expected: Download diagnostic action
+        candidates: diagnostics.speedtest.dispatch, Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState
+        impact: PRISME cannot trigger or observe download diagnostics.
+      - diagnostics.speedtest.upload.action (speedtest.upload.command) [diagnostic]
+        expected: Upload diagnostic action
+        candidates: diagnostics.speedtest.dispatch, Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState
+        impact: PRISME cannot trigger or observe upload diagnostics.
+    Missing optional / degraded evidence:
+      - diagnostics.speedtest.results (speedtest.result.values) [optional]
+        expected: Speed-test result values
+        candidates: Device.IP.Diagnostics.DownloadDiagnostics.DownloadTransports, Device.IP.Diagnostics.UploadDiagnostics.UploadTransports, scores.metrics.history.device.wan.download, scores.metrics.history.device.wan.upload
+        impact: Diagnostics can be discovered but result support cannot be validated from output parameters.
+
+  discovery.capabilityScan
+    name: Discovery capability scan
+    category: Discovery
+    support: partial
+    evidenceConfidence: medium
+    runtimeValidationRequired: true
+    Matched requirements:
+      - discovery.capabilityScan.dataModel (discovery.dataModel.family) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels, device.declaredDataModel
+      - discovery.capabilityScan.parameterPresence (discovery.parameter.presence) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
+      - discovery.capabilityScan.parameterValues (discovery.parameter.value) [optional]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
+
+  discovery.platformFeatureScan
+    name: Platform feature scan
+    category: Discovery
+    support: partial
+    evidenceConfidence: medium
+    runtimeValidationRequired: true
+    Matched requirements:
+      - discovery.platformFeatureScan.dataModel (discovery.dataModel.family) [mandatory]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState, Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels, device.declaredDataModel
+      - discovery.platformFeatureScan.readableEvidence (discovery.parameter.readable) [mandatory]: Device.WiFi.Radio.1.AutoChannelEnable, Device.WiFi.Radio.1.Channel, Device.WiFi.Radio.1.OperatingFrequencyBand, Device.WiFi.Radio.1.PossibleChannels
+
+  score.cpe.internet
+    name: CPE internet score
+    category: Score
+    support: unsupported
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Missing for support:
+      - score.cpe.internet.download.history (speedtest.download.throughput.history) [mandatory]
+        expected: Download throughput history
+        candidates: scores.metrics.history.device.wan.download, Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState
+        impact: Internet score cannot calculate download throughput contribution.
+      - score.cpe.internet.latency.history (speedtest.latency.history) [mandatory]
+        expected: Latency history
+        candidates: scores.metrics.history.device.wan.ping, Device.IP.Diagnostics.IPPing.DiagnosticsState
+        impact: Internet score cannot calculate latency contribution.
+      - score.cpe.internet.upload.history (speedtest.upload.throughput.history) [mandatory]
+        expected: Upload throughput history
+        candidates: scores.metrics.history.device.wan.upload, Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState
+        impact: Internet score cannot calculate upload throughput contribution.
+    Missing optional / degraded evidence:
+      - score.cpe.internet.wan.link (wan.interface.status) [optional]
+        expected: WAN link status
+        candidates: Device.Ethernet.Interface.{i}.Status, Device.IP.Interface.{i}.Status
+        impact: Score context is weaker without WAN interface status.
+
+  score.cpe.wifi
+    name: CPE Wi-Fi score
+    category: Score
+    support: unsupported
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Missing for support:
+      - score.cpe.wifi.noise.history (wifi.radio.noise.history) [mandatory]
+        expected: Radio noise history
+        candidates: scores.metrics.history.device.noise, Device.WiFi.Radio.{i}.Stats.Noise
+        impact: CPE Wi-Fi score cannot calculate radio noise contribution.
+      - score.cpe.wifi.utilization.history (wifi.radio.utilization.history) [mandatory]
+        expected: Radio utilization history
+        candidates: scores.metrics.history.device.utilization, Device.WiFi.Radio.{i}.Stats.ChannelUtilization
+        impact: CPE Wi-Fi score cannot calculate utilization contribution.
+    Missing optional / degraded evidence:
+      - score.cpe.wifi.clientSignal.history (wifi.client.rssi.history) [optional]
+        expected: Client signal history
+        candidates: scores.metrics.history.host.signalStrength, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength
+        impact: Score confidence is lower without client signal distribution.
+
+  score.host.wifi
+    name: Host Wi-Fi score
+    category: Score
+    support: unsupported
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Missing for support:
+      - score.host.wifi.phyRate.history (wifi.client.phyRate.history) [mandatory]
+        expected: Client PHY rate history
+        candidates: scores.metrics.history.host.downlinkRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataDownlinkRate
+        impact: Host Wi-Fi score cannot calculate PHY-rate contribution.
+      - score.host.wifi.signal.history (wifi.client.rssi.history) [mandatory]
+        expected: Client signal strength history
+        candidates: scores.metrics.history.host.signalStrength, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength
+        impact: Host Wi-Fi score cannot calculate signal contribution.
+    Missing optional / degraded evidence:
+      - score.host.wifi.errorRate.history (wifi.client.retryOrError.history) [optional]
+        expected: Client retry/error history
+        candidates: scores.metrics.history.host.errorsSentRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Retransmissions
+        impact: Score confidence is lower without retry/error evidence.
+
+  selfHealing.remoteChannelManagement
+    name: Remote channel management
+    category: SelfHealing
+    support: unsupported
+    evidenceConfidence: high
+    runtimeValidationRequired: true
+    Matched requirements:
+      - selfHealing.remoteChannelManagement.channel.allowed (wifi.radio.channel.allowedList) [mandatory]: Device.WiFi.Radio.1.PossibleChannels
+      - selfHealing.remoteChannelManagement.channel.current (wifi.radio.channel.current) [mandatory]: Device.WiFi.Radio.1.Channel
+      - selfHealing.remoteChannelManagement.radio.band (wifi.radio.band) [mandatory]: Device.WiFi.Radio.1.OperatingFrequencyBand
+      - selfHealing.remoteChannelManagement.scan.diagnostic (wifi.radio.neighborScan) [diagnostic]: Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState
+    Missing for support:
+      - selfHealing.remoteChannelManagement.channel.write (wifi.radio.channel.current) [control]
+        expected: Writable channel control
+        candidates: Device.WiFi.Radio.{i}.Channel, Device.WiFi.Radio.{i}.AutoChannelEnable
+        impact: PRISME may recommend a channel but cannot apply channel changes automatically.
+
+Runtime Validation Limitations
+  - customerCare.wifiSettings: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - diagnostics.speedtest: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - discovery.capabilityScan: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - discovery.platformFeatureScan: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - score.cpe.internet: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - score.cpe.wifi: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - score.host.wifi: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+  - selfHealing.remoteChannelManagement: Offline analysis cannot prove runtime value freshness, firmware behavior, or command execution success.
+
+Source Evidence
+  customerCare.wifiSettings
+    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
+    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+  diagnostics.speedtest
+    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
+    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+  discovery.capabilityScan
+    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
+    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+  discovery.platformFeatureScan
+    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
+    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+  score.cpe.internet
+    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
+    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+  score.cpe.wifi
+    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
+    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+  score.host.wifi
+    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
+    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.
+  selfHealing.remoteChannelManagement
+    - docs/offline-analyzer/feature-inventory.md Phase 1 feature inventory: Documents source-code-discovered features selected for initial analyzer support.
+    - docs/offline-analyzer/feature-parameter-dependencies.md Feature dependency draft: Captures reviewed dependency evidence before formal parameter mapping.

@@ -1,0 +1,27 @@
+{
+  "Report": [
+    { "path": "device.vendor", "kind": "metadata", "value": "ExampleVendor" },
+    { "path": "device.model", "kind": "metadata", "value": "ExampleModel" },
+    { "path": "device.firmwareVersion", "kind": "metadata", "value": "1.2.3" },
+    { "path": "device.declaredDataModel", "kind": "metadata", "value": "TR-181" },
+    { "path": "Device.WiFi.Radio.1.OperatingFrequencyBand", "value": "2.4GHz", "readable": true },
+    { "path": "Device.WiFi.Radio.1.PossibleChannels", "value": "1,6,11", "readable": true },
+    { "path": "Device.WiFi.Radio.1.Channel", "value": 6, "readable": true, "writable": true },
+    { "path": "Device.WiFi.Radio.1.AutoChannelEnable", "value": false, "readable": true, "writable": true },
+    { "path": "Device.WiFi.NeighboringWiFiDiagnostic.DiagnosticsState", "kind": "diagnostic", "value": "None", "available": true, "commandable": true },
+    { "path": "Device.WiFi.SSID.1.SSID", "value": "ExampleWiFi", "readable": true, "writable": true },
+    { "path": "Device.WiFi.AccessPoint.1.Enable", "value": true, "readable": true, "writable": true },
+    { "path": "Device.WiFi.AccessPoint.1.SSIDReference", "value": "Device.WiFi.SSID.1.", "readable": true },
+    { "path": "Device.WiFi.AccessPoint.1.Security.ModeEnabled", "value": "WPA2-Personal", "readable": true, "writable": true },
+    { "path": "scores.metrics.history.device.noise.2.4GHz", "kind": "history", "value": [-92, -91], "window": "24h" },
+    { "path": "scores.metrics.history.device.utilization.2.4GHz", "kind": "history", "value": [20, 25], "window": "24h" },
+    { "path": "scores.metrics.history.host.signalStrength.host-1", "kind": "history", "value": [-58, -61], "window": "24h" },
+    { "path": "scores.metrics.history.host.downlinkRate.host-1", "kind": "history", "value": [433, 390], "window": "24h" },
+    { "path": "scores.metrics.history.host.errorsSentRate.host-1", "kind": "history", "value": [0.01, 0.02], "window": "24h" },
+    { "path": "scores.metrics.history.device.wan.ping.avg", "kind": "history", "value": [12, 14], "window": "24h" },
+    { "path": "scores.metrics.history.device.wan.download", "kind": "history", "value": [350, 340], "window": "24h" },
+    { "path": "scores.metrics.history.device.wan.upload", "kind": "history", "value": [35, 33], "window": "24h" },
+    { "path": "Device.Ethernet.Interface.1.Status", "value": "Up", "readable": true },
+    { "path": "diagnostics.speedtest.dispatch", "kind": "diagnostic", "value": "available", "available": true, "commandable": true }
+  ]
+}
