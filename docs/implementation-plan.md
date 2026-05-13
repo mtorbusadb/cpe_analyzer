@@ -523,3 +523,30 @@ Add `discovery.rediscovery` to the default registry as a runtime-only workflow t
 ### Next Command
 
 Run `planlock` before the next expansion or hardening step.
+
+
+## Phase 6 Autostep - CLI Fail-On Hardening
+
+### Scope
+
+Add repeatable `--fail-on <status>` CLI support so automation can generate the text report and still fail the process when selected support statuses are present.
+
+Supported exact status values:
+
+- `supported`
+- `partial`
+- `unsupported`
+- `unknown`
+- `implementation_not_found`
+
+### Acceptance Criteria
+
+- Report output is written before the process exits non-zero.
+- Matching selected statuses return exit code `2`.
+- Non-matching selected statuses return success.
+- Existing report output and color behavior are unchanged.
+- Full gate continues to pass.
+
+### Next Command
+
+Run `planlock` before the next feature expansion or larger hardening step.
