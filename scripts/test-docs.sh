@@ -2,6 +2,7 @@
 set -euo pipefail
 
 required_files=(
+  "README.md"
   "AGENTS.md"
   "docs/feature-discovery-plan.md"
   "docs/capability-mapping-plan.md"

@@ -550,3 +550,63 @@ Supported exact status values:
 ### Next Command
 
 Run `planlock` before the next feature expansion or larger hardening step.
+
+
+## Phase 7 Autostep - User-Facing Runbook
+
+### Scope
+
+Add a concise user-facing runbook for the current analyzer behavior so a developer can run it without reading the implementation plan.
+
+This phase should not expand the feature registry or change evaluation semantics.
+
+### Deliverables
+
+- `README.md` at the project root, or an equivalent top-level entrypoint if one already exists.
+- Document the supported JSON input format at a practical level and link to `docs/offline-analyzer/input-json-format.md`.
+- Document the text report output, including supported statuses and what `implementation_not_found` means.
+- Document color behavior: `--color=never`, `--color=always`, and `--no-color`.
+- Document `--fail-on <status>` with the exact accepted status values:
+  - `supported`
+  - `partial`
+  - `unsupported`
+  - `unknown`
+  - `implementation_not_found`
+- Document the standard local commands:
+  - `cargo test`
+  - `make test`
+  - example `cargo run -- --input ... --output ...`
+- Document that generated `out/` reports are local artifacts and must not be committed.
+
+### Tests
+
+Update documentation checks if needed so the new runbook is included in `make test`.
+
+Do not add implementation tests unless behavior changes are required to make the documented commands true.
+
+### Commands
+
+Run the documentation and normal validation gate before commit:
+
+```bash
+cargo fmt --check
+cargo test
+make test
+cargo run -- --input docs/offline-analyzer/examples/input-basic.json --output out/compatibility-report.txt --color=never
+cargo run -- --input docs/offline-analyzer/examples/input-basic.json --output out/compatibility-report.txt --color=never --fail-on unsupported
+git diff --check
+```
+
+The `--fail-on unsupported` command is expected to return exit code `2` after writing the report. Treat that as a passing check only if the report file exists and the stderr explains the matched status.
+
+### Acceptance Criteria
+
+- A new developer can identify the project purpose and run the analyzer from the root documentation.
+- The documented CLI examples match current behavior.
+- The runbook explains missing-data reporting for unsupported features.
+- The runbook explains that runtime support is not proven by static JSON input.
+- All relevant validation commands pass, with the expected `--fail-on unsupported` exit code documented.
+
+### Next Command
+
+Run `autostep` to execute Phase 7.
