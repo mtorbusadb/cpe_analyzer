@@ -316,6 +316,67 @@ fn aqos_features_have_source_references_with_line_numbers() {
     }
 }
 
+#[test]
+fn p0_feature_statuses_on_basic_supported_fixture_are_stable() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/basic-supported.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    assert_eq!(
+        feature_status(&report, "discovery.capabilityScan"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "discovery.platformFeatureScan"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "score.cpe.overall"),
+        SupportStatus::Unsupported
+    );
+    assert_eq!(
+        feature_status(&report, "score.cpe.wifi"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "score.host.wifi"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "score.cpe.internet"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "selfHealing.remoteChannelManagement"),
+        SupportStatus::Partial
+    );
+}
+
+#[test]
+fn p0_feature_statuses_on_minimal_fixture_are_unsupported() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/missing-mandatory.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    for feature_id in [
+        "discovery.capabilityScan",
+        "discovery.platformFeatureScan",
+        "score.cpe.overall",
+        "score.cpe.wifi",
+        "score.host.wifi",
+        "score.cpe.internet",
+        "selfHealing.remoteChannelManagement",
+    ] {
+        assert_eq!(
+            feature_status(&report, feature_id),
+            SupportStatus::Unsupported,
+            "{feature_id}"
+        );
+    }
+}
+
 fn assert_sorted_missing(missing: &[cpe_analyzer::model::MissingRequirement], feature_id: &str) {
     let ids: Vec<_> = missing.iter().map(|item| item.rule_id.as_str()).collect();
     let mut sorted = ids.clone();
