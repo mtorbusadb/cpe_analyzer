@@ -469,6 +469,37 @@ fn tr098_speedtest_non_commandable_diagnostics_are_unsupported() {
     );
 }
 
+#[test]
+fn p2_features_can_be_degraded_partial_with_runtime_heavy_evidence() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/p2-degraded-partial.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    for feature_id in [
+        "customerCare.topologyMap",
+        "customerCare.scoreDrilldown",
+        "noc.populationScores",
+    ] {
+        assert_eq!(
+            feature_status(&report, feature_id),
+            SupportStatus::Partial,
+            "{feature_id}"
+        );
+        assert_eq!(
+            report
+                .features
+                .iter()
+                .find(|f| f.feature_id == feature_id)
+                .unwrap()
+                .evidence_confidence
+                .as_str(),
+            EvidenceConfidence::Medium.as_str(),
+            "{feature_id}"
+        );
+    }
+}
+
 fn assert_sorted_missing(missing: &[cpe_analyzer::model::MissingRequirement], feature_id: &str) {
     let ids: Vec<_> = missing.iter().map(|item| item.rule_id.as_str()).collect();
     let mut sorted = ids.clone();

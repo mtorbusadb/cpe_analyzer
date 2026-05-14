@@ -1,0 +1,11 @@
+{
+  "Report": [
+    { "path": "device.vendor", "kind": "metadata", "value": "P2Vendor" },
+    { "path": "device.model", "kind": "metadata", "value": "P2Model" },
+    { "path": "device.declaredDataModel", "kind": "metadata", "value": "TR-181" },
+
+    { "path": "topology.map", "kind": "value", "value": { "nodes": [] } },
+    { "path": "customerCare.score.device", "kind": "value", "value": 72 },
+    { "path": "scores.scores.history", "kind": "history", "value": [72, 71, 70] }
+  ]
+}

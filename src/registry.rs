@@ -193,7 +193,7 @@ pub fn phase1_features() -> Vec<FeatureDefinition> {
             "customerCare.topologyMap",
             "Customer-care topology map",
             "CustomerCare",
-            EvidenceConfidence::High,
+            EvidenceConfidence::Medium,
             false,
             false,
             vec![
@@ -206,7 +206,7 @@ pub fn phase1_features() -> Vec<FeatureDefinition> {
             "customerCare.scoreDrilldown",
             "Customer-care score drill-down",
             "CustomerCare",
-            EvidenceConfidence::High,
+            EvidenceConfidence::Medium,
             false,
             false,
             vec![
@@ -220,7 +220,7 @@ pub fn phase1_features() -> Vec<FeatureDefinition> {
             "noc.populationScores",
             "NOC population score analytics",
             "NOC",
-            EvidenceConfidence::High,
+            EvidenceConfidence::Medium,
             false,
             false,
             vec![
