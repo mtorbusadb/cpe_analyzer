@@ -326,6 +326,26 @@ CLI/API entrypoint:
 - Prefer an existing CLI/task/command pattern in the chosen host repository.
 - If no CLI pattern exists, add the smallest local command entrypoint needed to run the analyzer against a snapshot.
 
+## PRISME baseline compatibility versioning
+
+`cpe_analyzer` must store and report the PRISME baseline versions it was aligned against.
+
+Required baseline artifact:
+
+- `docs/offline-analyzer/prisme-baseline.lock`
+
+The baseline lock must include deterministic version identifiers for all three PRISME repositories:
+
+- `prisme-backend`
+- `prisme-ui`
+- `tss`
+
+At minimum, each repository entry must include a commit SHA used as the compatibility baseline.
+
+Because `cpe_analyzer` may run on machines without local PRISME source code, the analyzer report must include these baseline versions even when live repository comparison is unavailable.
+
+When PRISME repositories are available locally during development, Codex should compare current repository versions against `prisme-baseline.lock` and treat detected drift as implementation-review input.
+
 ## Functional requirements
 
 The analyzer must run offline.
@@ -787,3 +807,12 @@ These shortcuts define agreed interaction commands between user and agent.
     - verify GitHub release workflow success.
     - report resulting release asset names and checksum entries.
   - Use when producing downloadable prebuilt static binary artifacts for team/users.
+
+- `align`
+  - Rescan PRISME repositories in read-only mode and compare current repository versions and evidence paths against `docs/offline-analyzer/prisme-baseline.lock`.
+  - Produce a drift summary:
+    - baseline vs current versions per repository
+    - impacted features/concepts/rules/tests/docs in `cpe_analyzer`
+    - risk notes and unknowns caused by drift
+  - After the drift summary, automatically run `planlock` to produce a gap-closure milestone plan for `cpe_analyzer`.
+  - `align` must not modify any PRISME repository files.
