@@ -51,6 +51,11 @@ def main() -> int:
         default="docs/offline-analyzer/align-drift-report.md",
         help="Output markdown report path",
     )
+    parser.add_argument(
+        "--generated-at",
+        default=None,
+        help="Override generated timestamp text for deterministic output/testing",
+    )
     args = parser.parse_args()
 
     repo_root = pathlib.Path(__file__).resolve().parents[1]
@@ -77,7 +82,7 @@ def main() -> int:
     refs = referenced_prisme_files(registry_path)
     missing = [p for p in refs if not (prisme_root / p).is_file()]
 
-    now = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
+    now = args.generated_at or dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
     lines = [
         "# Align Drift Report",
         "",
