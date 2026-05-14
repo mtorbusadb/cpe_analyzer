@@ -592,6 +592,26 @@ fn source_aligned_feature_can_emit_implementation_not_found_when_logic_is_missin
     );
 }
 
+#[test]
+fn vendor_non_aqos_fixture_drives_customer_and_noc_features_to_partial() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/vendor-non-aqos-partial.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    for feature_id in [
+        "customerCare.topologyMap",
+        "customerCare.scoreDrilldown",
+        "noc.populationScores",
+    ] {
+        assert_eq!(
+            feature_status(&report, feature_id),
+            SupportStatus::Partial,
+            "{feature_id}"
+        );
+    }
+}
+
 fn assert_sorted_missing(missing: &[cpe_analyzer::model::MissingRequirement], feature_id: &str) {
     let ids: Vec<_> = missing.iter().map(|item| item.rule_id.as_str()).collect();
     let mut sorted = ids.clone();

@@ -1,0 +1,16 @@
+{
+  "Report": [
+    { "path": "device.vendor", "kind": "metadata", "value": "VendorX" },
+    { "path": "device.model", "kind": "metadata", "value": "ModelZ" },
+    { "path": "device.declaredDataModel", "kind": "metadata", "value": "TR-181" },
+
+    { "path": "customerCare.topology.deviceServiceMap", "kind": "derivedMetric", "value": { "nodes": [{ "id": "ap-1" }] } },
+
+    { "path": "customerCare.score.device", "kind": "score", "value": 74 },
+    { "path": "customerCare.score.host", "kind": "score", "value": 68 },
+    { "path": "customerCare.score.series", "kind": "history", "value": [74, 72, 71] },
+
+    { "path": "noc.populationScores.scoreSeries", "kind": "history", "value": [70, 71, 73], "window": "24h" },
+    { "path": "noc.populationScores.current", "kind": "score", "value": { "supported": 15, "partial": 3 } }
+  ]
+}
