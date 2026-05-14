@@ -1,0 +1,22 @@
+{
+  "Report": [
+    { "path": "device.vendor", "kind": "metadata", "value": "TR098Vendor" },
+    { "path": "device.model", "kind": "metadata", "value": "TR098Model" },
+    { "path": "device.declaredDataModel", "kind": "metadata", "value": "TR-098" },
+
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID", "value": "TR098-SSID", "readable": true, "writable": true },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.Enable", "value": true, "readable": true, "writable": true },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.BSSID", "value": "AA:BB:CC:DD:EE:FF", "readable": true },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.BeaconType", "value": "WPAand11i", "readable": true, "writable": true },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.PreSharedKey.1.KeyPassphrase", "value": "secret123", "readable": true, "writable": true },
+
+    { "path": "InternetGatewayDevice.DownloadDiagnostics.DiagnosticsState", "kind": "diagnostic", "value": "None", "available": true, "commandable": true },
+    { "path": "InternetGatewayDevice.UploadDiagnostics.DiagnosticsState", "kind": "diagnostic", "value": "None", "available": true, "commandable": true },
+    { "path": "diagnostics.speedtest.dispatch", "kind": "diagnostic", "value": "available", "available": true, "commandable": true },
+
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.Channel", "value": 6, "readable": true, "writable": true },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.AutoChannelEnable", "value": false, "readable": true, "writable": true },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.PossibleChannels", "value": "1,6,11", "readable": true },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.OperatingFrequencyBand", "value": "2.4GHz", "readable": true }
+  ]
+}

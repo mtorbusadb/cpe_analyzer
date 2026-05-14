@@ -433,6 +433,28 @@ fn p1_feature_statuses_on_minimal_fixture_are_unsupported() {
     }
 }
 
+#[test]
+fn tr098_wifi_and_diagnostics_fixture_exercises_new_candidate_paths() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/tr098-wifi-speedtest.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    assert_eq!(snapshot.detected_data_model, "TR-098");
+    assert_eq!(
+        feature_status(&report, "selfHealing.remoteChannelManagement"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "customerCare.wifiSettings"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "diagnostics.speedtest"),
+        SupportStatus::Partial
+    );
+}
+
 fn assert_sorted_missing(missing: &[cpe_analyzer::model::MissingRequirement], feature_id: &str) {
     let ids: Vec<_> = missing.iter().map(|item| item.rule_id.as_str()).collect();
     let mut sorted = ids.clone();
