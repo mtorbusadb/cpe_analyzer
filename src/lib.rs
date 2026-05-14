@@ -1,3 +1,4 @@
+pub mod baseline;
 pub mod evaluator;
 pub mod input;
 pub mod model;

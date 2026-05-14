@@ -1,0 +1,11 @@
+{
+  "prisme_backend": {
+    "commit_sha": "unknown"
+  },
+  "prisme_ui": {
+    "commit_sha": "unknown"
+  },
+  "tss": {
+    "commit_sha": "unknown"
+  }
+}

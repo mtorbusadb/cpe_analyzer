@@ -55,6 +55,18 @@ pub struct DeviceInfo {
     pub declared_data_model: Option<String>,
 }
 
+#[derive(Debug, Clone)]
+pub struct BaselineRepoVersion {
+    pub commit_sha: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct PrismeBaseline {
+    pub prisme_backend: BaselineRepoVersion,
+    pub prisme_ui: BaselineRepoVersion,
+    pub tss: BaselineRepoVersion,
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
 pub enum SupportStatus {
     Supported,
@@ -185,6 +197,7 @@ pub struct Report {
     pub assessment_basis: String,
     pub device: DeviceInfo,
     pub detected_data_model: String,
+    pub prisme_baseline: PrismeBaseline,
     pub features: Vec<FeatureAssessment>,
     pub summary: BTreeMap<String, usize>,
 }

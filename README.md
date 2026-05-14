@@ -54,6 +54,7 @@ The report includes:
 
 - `reportFormatVersion`,
 - device identification and detected data model,
+- PRISME baseline compatibility versions (`prisme-backend`, `prisme-ui`, `tss`) from `docs/offline-analyzer/prisme-baseline.lock`,
 - feature support summary,
 - feature matrix,
 - matched requirements,

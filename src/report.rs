@@ -33,6 +33,21 @@ pub fn render_text_report(report: &Report, color_mode: ColorMode) -> String {
     .unwrap();
     writeln!(out, "  detectedDataModel: {}", report.detected_data_model).unwrap();
     writeln!(out).unwrap();
+    writeln!(out, "PRISME Baseline Compatibility").unwrap();
+    writeln!(
+        out,
+        "  prisme-backend: {}",
+        report.prisme_baseline.prisme_backend.commit_sha
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "  prisme-ui: {}",
+        report.prisme_baseline.prisme_ui.commit_sha
+    )
+    .unwrap();
+    writeln!(out, "  tss: {}", report.prisme_baseline.tss.commit_sha).unwrap();
+    writeln!(out).unwrap();
     writeln!(out, "Summary").unwrap();
     for key in [
         "supportedFeatures",
@@ -209,6 +224,8 @@ mod tests {
         let text = render_text_report(&report, ColorMode::Never);
         assert!(text.contains("PRISME Offline CPE Compatibility Report"));
         assert!(text.contains("reportFormatVersion: 1"));
+        assert!(text.contains("PRISME Baseline Compatibility"));
+        assert!(text.contains("prisme-backend:"));
         assert!(text.contains("Missing for support"));
         assert!(!text.contains("\u{1b}["));
     }

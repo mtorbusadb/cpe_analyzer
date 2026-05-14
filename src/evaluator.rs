@@ -1,3 +1,4 @@
+use crate::baseline::load_embedded_baseline;
 use crate::model::{
     FeatureAssessment, FeatureDefinition, MatchMode, MissingRequirement, Report, Requirement,
     RequirementGroup, RequirementMatch, Snapshot, SupportStatus,
@@ -41,6 +42,7 @@ pub fn evaluate_definitions(snapshot: &Snapshot, definitions: &[FeatureDefinitio
         assessment_basis: "staticDataModelSnapshot".to_string(),
         device: snapshot.device.clone(),
         detected_data_model: snapshot.detected_data_model.clone(),
+        prisme_baseline: load_embedded_baseline(),
         features,
         summary,
     }
