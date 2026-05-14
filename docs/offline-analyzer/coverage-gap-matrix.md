@@ -48,9 +48,9 @@ Although all target features are present in registry and recent milestones impro
 - Example output sync is now enforced by test.
 - Plan/gap docs still need periodic refresh whenever feature registry semantics change.
 
-3. Coverage depth for mixed-edge status transitions
-- Core status coverage is broad, including source-aligned `unknown` and `implementation_not_found`.
-- Remaining opportunity is richer mixed-edge fixtures that exercise multiple degraded branches in one snapshot while preserving deterministic ordering.
+3. Release-readiness gate execution
+- Core status coverage is broad, including mixed-edge fixtures and source-aligned `unknown`/`implementation_not_found`.
+- The remaining step is full pre-release verification via the agreed `releasecheck` flow.
 
 ## Current drift/risk snapshot
 
@@ -60,11 +60,11 @@ From latest align artifact:
 
 ## Next implementation focus
 
-1. Expand deterministic/reporting guardrails
-- Add lightweight checks for additional committed docs that depend on generated/reported content.
+1. Execute release-level verification pass
+- Run `releasecheck` (full tests, bench gate, CLI/options/doc consistency check, config/schema sanity).
 
-2. Mixed-edge fixture hardening
-- Add one composite fixture that simultaneously drives partial/unsupported splits across score, diagnostics, and customer-care features.
+2. Resolve any releasecheck failures
+- Apply narrowly scoped fixes, rerun gate, and keep deterministic output guarantees intact.
 
-3. Prepare release-level verification pass
-- Run `releasecheck` once no further milestone changes are pending.
+3. Finalize delivery sequence
+- After green releasecheck, run `commit&push!` summary and proceed to release/tag flow when requested.
