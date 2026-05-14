@@ -28,6 +28,31 @@ Importance scale:
 
 ## Active Feature Inventory
 
+## Priority Tier Mapping (Coverage Plan)
+
+This section maps active features to implementation priority tiers used by
+`docs/offline-analyzer/full-coverage-plan.md`.
+
+- `P0` (foundational/high-impact):
+  - `discovery.capabilityScan`
+  - `discovery.platformFeatureScan`
+  - `score.cpe.overall`
+  - `score.cpe.wifi`
+  - `score.host.wifi`
+  - `score.cpe.internet`
+  - `selfHealing.remoteChannelManagement`
+- `P1` (major breadth):
+  - `discovery.rediscovery`
+  - `selfHealing.aqosDynamicPrioritization`
+  - `selfHealing.aqosAirtimeFairnessTuning`
+  - `selfHealing.aqosRtsCtsThresholdTuning`
+  - `customerCare.wifiSettings`
+  - `diagnostics.speedtest`
+- `P2` (extended breadth):
+  - `customerCare.topologyMap`
+  - `customerCare.scoreDrilldown`
+  - `noc.populationScores`
+
 ### 1. Discovery Program capability scan
 
 - Feature ID candidate: `discovery.capabilityScan`
