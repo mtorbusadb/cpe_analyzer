@@ -9,6 +9,11 @@ Device
   declaredDataModel: TR-181
   detectedDataModel: TR-181
 
+PRISME Baseline Compatibility
+  prisme-backend: d4821d7d2c5e24cd13c55fc109831a9fc3486529
+  prisme-ui: 32d3cc32bf7f6cdbc1a9355ee296d3323d9ccd07
+  tss: 6abab384e6f4b6bbffbecb8518e5a92beb236a25
+
 Summary
   supportedFeatures: 0
   partialFeatures: 3
@@ -39,7 +44,7 @@ Feature Details
     name: Customer-care score drill-down
     category: CustomerCare
     support: unsupported
-    evidenceConfidence: high
+    evidenceConfidence: medium
     runtimeValidationRequired: true
     Missing for support:
       - customerCare.scoreDrilldown.deviceScore (customerCare.scoreDrilldown.scoreConsumption) [mandatory]
@@ -60,7 +65,7 @@ Feature Details
     name: Customer-care topology map
     category: CustomerCare
     support: unsupported
-    evidenceConfidence: high
+    evidenceConfidence: medium
     runtimeValidationRequired: true
     Missing for support:
       - customerCare.topologyMap.deviceServiceMap (customerCare.topology.deviceServiceMap) [mandatory]
@@ -82,19 +87,19 @@ Feature Details
     Missing for support:
       - customerCare.wifiSettings.ap.read (customerCare.wifi.fullTreeRead) [mandatory]
         expected: Access point configuration readable
-        candidates: Device.WiFi.AccessPoint.{i}.Enable, Device.WiFi.AccessPoint.{i}.SSIDReference
+        candidates: Device.WiFi.AccessPoint.{i}.Enable, Device.WiFi.AccessPoint.{i}.SSIDReference, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.Enable, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.BSSID
         impact: Customer care cannot display access point configuration.
       - customerCare.wifiSettings.security.read (customerCare.wifi.apSsidSecuritySettings) [mandatory]
         expected: Security mode readable
-        candidates: Device.WiFi.AccessPoint.{i}.Security.ModeEnabled
+        candidates: Device.WiFi.AccessPoint.{i}.Security.ModeEnabled, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.BeaconType
         impact: Customer care cannot display Wi-Fi security mode.
       - customerCare.wifiSettings.ssid.read (customerCare.wifi.apSsidSecuritySettings) [mandatory]
         expected: SSID name readable
-        candidates: Device.WiFi.SSID.{i}.SSID
+        candidates: Device.WiFi.SSID.{i}.SSID, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.SSID
         impact: Customer care cannot display SSID names.
       - customerCare.wifiSettings.ssid.write (customerCare.wifi.configurationWrite) [control]
         expected: SSID/security write control
-        candidates: Device.WiFi.SSID.{i}.SSID, Device.WiFi.AccessPoint.{i}.Security.KeyPassphrase
+        candidates: Device.WiFi.SSID.{i}.SSID, Device.WiFi.AccessPoint.{i}.Security.KeyPassphrase, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.SSID, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.PreSharedKey.1.KeyPassphrase
         impact: Customer care can display settings but cannot update them.
 
   diagnostics.speedtest
@@ -110,16 +115,16 @@ Feature Details
         impact: PRISME cannot trigger the speed-test command path.
       - diagnostics.speedtest.download.action (diagnostics.speedtest.diagnosticsRequest) [diagnostic]
         expected: Download diagnostic request path
-        candidates: Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState
+        candidates: Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState, InternetGatewayDevice.DownloadDiagnostics.DiagnosticsState
         impact: PRISME cannot trigger or observe download diagnostics.
       - diagnostics.speedtest.upload.action (diagnostics.speedtest.diagnosticsRequest) [diagnostic]
         expected: Upload diagnostic request path
-        candidates: Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState
+        candidates: Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState, InternetGatewayDevice.UploadDiagnostics.DiagnosticsState
         impact: PRISME cannot trigger or observe upload diagnostics.
     Missing optional / degraded evidence:
       - diagnostics.speedtest.results (speedtest.result.values) [optional]
         expected: Speed-test result values
-        candidates: Device.IP.Diagnostics.DownloadDiagnostics.DownloadTransports, Device.IP.Diagnostics.UploadDiagnostics.UploadTransports, scores.metrics.history.device.wan.download, scores.metrics.history.device.wan.upload
+        candidates: Device.IP.Diagnostics.DownloadDiagnostics.DownloadTransports, Device.IP.Diagnostics.UploadDiagnostics.UploadTransports, InternetGatewayDevice.DownloadDiagnostics.TotalBytesReceived, InternetGatewayDevice.UploadDiagnostics.TotalBytesSent, scores.metrics.history.device.wan.download, scores.metrics.history.device.wan.upload
         impact: Diagnostics can be discovered but result support cannot be validated from output parameters.
 
   discovery.capabilityScan
@@ -163,7 +168,7 @@ Feature Details
     name: NOC population score analytics
     category: NOC
     support: unsupported
-    evidenceConfidence: high
+    evidenceConfidence: medium
     runtimeValidationRequired: true
     Missing for support:
       - noc.populationScores.scoreSeries (noc.populationScores.scoreConsumption) [mandatory]
@@ -185,15 +190,15 @@ Feature Details
     Missing for support:
       - score.cpe.internet.download.history (score.cpe.internet.downloadHistory) [mandatory]
         expected: Download throughput history
-        candidates: scores.metrics.history.device.wan.download, Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState
+        candidates: scores.metrics.history.device.wan.download, Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState, InternetGatewayDevice.DownloadDiagnostics.DiagnosticsState
         impact: Internet score cannot calculate download throughput contribution.
       - score.cpe.internet.latency.history (score.cpe.internet.latencyHistory) [mandatory]
         expected: Latency and packet-loss history
-        candidates: scores.metrics.history.device.wan.ping, Device.IP.Diagnostics.IPPing.DiagnosticsState
+        candidates: scores.metrics.history.device.wan.ping, Device.IP.Diagnostics.IPPing.DiagnosticsState, InternetGatewayDevice.IPPingDiagnostics.DiagnosticsState
         impact: Internet score cannot calculate latency contribution.
       - score.cpe.internet.upload.history (score.cpe.internet.uploadHistory) [mandatory]
         expected: Upload throughput history
-        candidates: scores.metrics.history.device.wan.upload, Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState
+        candidates: scores.metrics.history.device.wan.upload, Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState, InternetGatewayDevice.UploadDiagnostics.DiagnosticsState
         impact: Internet score cannot calculate upload throughput contribution.
     Missing optional / degraded evidence:
       - score.cpe.internet.wanAccess.history (score.wan.access.ethernetHistory) [optional]
@@ -235,24 +240,24 @@ Feature Details
     Missing for support:
       - score.cpe.wifi.clientPhy.history (score.host.wifi.phyRateHistory) [mandatory]
         expected: Client PHY-rate history
-        candidates: scores.metrics.history.host.downlinkRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataDownlinkRate
+        candidates: scores.metrics.history.host.downlinkRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataDownlinkRate, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.AssociatedDevice.{i}.LastDataTransmitRate
         impact: CPE Wi-Fi score cannot calculate coverage from weighted PHY-rate evidence.
       - score.cpe.wifi.clientSignal.history (score.host.wifi.rssiHistory) [mandatory]
         expected: Client signal history
-        candidates: scores.metrics.history.host.signalStrength, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength
+        candidates: scores.metrics.history.host.signalStrength, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.AssociatedDevice.{i}.SignalStrength
         impact: CPE Wi-Fi score cannot calculate coverage from weighted client signal evidence.
       - score.cpe.wifi.noise.history (score.cpe.wifi.noiseHistory) [mandatory]
         expected: Radio noise history
-        candidates: scores.metrics.history.device.noise, Device.WiFi.Radio.{i}.Stats.Noise
+        candidates: scores.metrics.history.device.noise, Device.WiFi.Radio.{i}.Stats.Noise, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.Stats.Noise
         impact: CPE Wi-Fi score cannot calculate network interference noise input.
       - score.cpe.wifi.utilization.history (score.cpe.wifi.utilizationHistory) [mandatory]
         expected: Radio utilization history
-        candidates: scores.metrics.history.device.utilization, Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Utilization, Device.WiFi.Radio.{i}.Stats.ChannelUtilization
+        candidates: scores.metrics.history.device.utilization, Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Utilization, Device.WiFi.Radio.{i}.Stats.ChannelUtilization, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.ChannelUtilization
         impact: CPE Wi-Fi score cannot calculate network interference utilization input.
     Missing optional / degraded evidence:
       - score.cpe.wifi.clientError.history (score.host.wifi.errorRateHistory) [optional]
         expected: Client error-rate history
-        candidates: scores.metrics.history.host.errorsSentRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.ErrorsSent
+        candidates: scores.metrics.history.host.errorsSentRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.ErrorsSent, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.Stats.ErrorsSent
         impact: Score may degrade because traffic/error-rate contribution is missing.
 
   score.host.wifi
@@ -264,16 +269,16 @@ Feature Details
     Missing for support:
       - score.host.wifi.phyRate.history (score.host.wifi.phyRateHistory) [mandatory]
         expected: Client PHY-rate history
-        candidates: scores.metrics.history.host.downlinkRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataDownlinkRate
+        candidates: scores.metrics.history.host.downlinkRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataDownlinkRate, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.AssociatedDevice.{i}.LastDataTransmitRate
         impact: Host Wi-Fi score cannot calculate PHY-rate contribution.
       - score.host.wifi.signal.history (score.host.wifi.rssiHistory) [mandatory]
         expected: Client signal strength history
-        candidates: scores.metrics.history.host.signalStrength, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength
+        candidates: scores.metrics.history.host.signalStrength, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.AssociatedDevice.{i}.SignalStrength
         impact: Host Wi-Fi score cannot calculate signal contribution.
     Missing optional / degraded evidence:
       - score.host.wifi.errorRate.history (score.host.wifi.errorRateHistory) [optional]
         expected: Client retry/error history
-        candidates: scores.metrics.history.host.errorsSentRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.ErrorsSent
+        candidates: scores.metrics.history.host.errorsSentRate, Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.ErrorsSent, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.Stats.ErrorsSent
         impact: Host Wi-Fi score can fall back through zero-as-not-available semantics, but traffic confidence is lower.
 
   selfHealing.aqosAirtimeFairnessTuning
@@ -368,7 +373,7 @@ Feature Details
     Missing for support:
       - selfHealing.remoteChannelManagement.channel.write (selfHealing.rcm.channelWrite) [control]
         expected: Writable channel control
-        candidates: Device.WiFi.Radio.{i}.Channel, Device.WiFi.Radio.{i}.AutoChannelEnable
+        candidates: Device.WiFi.Radio.{i}.Channel, Device.WiFi.Radio.{i}.AutoChannelEnable, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.Channel, InternetGatewayDevice.LANDevice.{i}.WLANConfiguration.{i}.AutoChannelEnable
         impact: PRISME may recommend a channel but cannot apply channel changes automatically.
     Missing optional / degraded evidence:
       - selfHealing.remoteChannelManagement.channel.scoring (selfHealing.rcm.channelScoring) [optional]
@@ -405,7 +410,6 @@ Source Evidence
     - prisme-backend/services/customer-care-agent/src/rest/handler.go:53-53 map routes: Registers customer-care topology map routes.
     - prisme-backend/services/customer-care-agent/src/services/map.go:12-12 GetCpeMap: Defines topology map service entrypoint.
     - prisme-backend/services/customer-care-agent/src/services/map.go:27-27 device-service status: Consumes runtime device-service map output.
-    - prisme-backend/services/customer-care-agent/src/services/map_bulk_fallback.go:39-39 bulk fallback: Defines fallback helper with no confirmed active call path.
   customerCare.wifiSettings
     - prisme-backend/services/customer-care-agent/src/rest/handler.go:35-35 management routes: Registers Wi-Fi settings management endpoints.
     - prisme-backend/services/customer-care-agent/src/management/wifi_suite_api/api.go:83-83 wifiSuiteApi: Exposes Wi-Fi suite read API.

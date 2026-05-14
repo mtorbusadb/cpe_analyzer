@@ -38,16 +38,18 @@ Status of target features by implementation presence:
 
 ## Residual gaps (quality, not existence)
 
-Although all target features are present in registry, remaining gap categories are:
+Although all target features are present in registry and recent milestones improved quality, remaining gap categories are:
 
-1. Status-case depth per feature
-- Some features have broad candidate coverage but still need more focused fixtures for all edge outcomes (`unknown`, `implementation_not_found`, degraded `partial` branches).
+1. Unknown/implementation-not-found realism
+- `unknown` and `implementation_not_found` are currently covered through custom test definitions.
+- Add source-aligned fixture paths that exercise these statuses without synthetic-only feature definitions.
 
-2. Mapping precision
-- TR-181/TR-098 and vendor path variants are present, but precision and confidence can still improve per feature with richer fixtures.
+2. Mapping precision for vendor/extensions
+- TR-181/TR-098 coverage is stronger, but vendor-specific extension patterns are still lightly represented in fixtures.
 
-3. Evidence durability
-- Source references currently resolve for registry references scanned by `align`, but commit-level behavior drift still requires periodic `align` and targeted evidence reviews.
+3. Ongoing evidence drift monitoring
+- `align` smoke coverage now exists, and registry reference integrity is clean.
+- Continue periodic read-only `align` runs to detect commit drift against the locked baseline.
 
 ## Current drift/risk snapshot
 
@@ -57,11 +59,11 @@ From latest align artifact:
 
 ## Next implementation focus
 
-1. P0 quality hardening
-- Add fixture/test cases that force each P0 feature through all relevant status boundaries.
+1. Source-aligned `unknown` and `implementation_not_found` scenarios
+- Introduce fixture/rule cases that avoid synthetic-only status coverage and are traceable to documented feature inventory gaps.
 
-2. P1 control/diagnostic rigor
-- Strengthen tests around writable/diagnostic gates for AQoS and speedtest pathways.
+2. Vendor-extension mapping fixtures
+- Add one or more fixtures that explicitly exercise vendor parameter variants for mapped concepts and verify deterministic status transitions.
 
-3. P2 confidence tuning
-- Refine topology and NOC evidence confidence semantics and add targeted degradation fixtures.
+3. Documentation maintenance cadence
+- Keep example report and gap matrix synchronized after each status/confidence rule change.
