@@ -154,4 +154,10 @@ Optional root override:
 python3 scripts/align.py --prisme-root /path/to/prisme
 ```
 
+Optional deterministic timestamp override (useful for tests/CI diffs):
+
+```bash
+python3 scripts/align.py --generated-at "2026-05-14 00:00:00 UTC"
+```
+
 This writes `docs/offline-analyzer/align-drift-report.md` and does not modify PRISME repositories.

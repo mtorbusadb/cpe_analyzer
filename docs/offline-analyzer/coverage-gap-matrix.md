@@ -40,16 +40,17 @@ Status of target features by implementation presence:
 
 Although all target features are present in registry and recent milestones improved quality, remaining gap categories are:
 
-1. Unknown/implementation-not-found realism
-- `unknown` and `implementation_not_found` are currently covered through custom test definitions.
-- Add source-aligned fixture paths that exercise these statuses without synthetic-only feature definitions.
+1. Vendor-extension breadth beyond AQoS
+- Vendor-extension coverage now exists for AQoS paths.
+- Additional non-AQoS vendor extension fixtures are still limited.
 
-2. Mapping precision for vendor/extensions
-- TR-181/TR-098 coverage is stronger, but vendor-specific extension patterns are still lightly represented in fixtures.
-
-3. Ongoing evidence drift monitoring
-- `align` smoke coverage now exists, and registry reference integrity is clean.
+2. Ongoing evidence drift monitoring
+- `align` smoke and deterministic-output coverage now exist, and registry reference integrity is clean.
 - Continue periodic read-only `align` runs to detect commit drift against the locked baseline.
+
+3. Documentation drift risk as rules evolve
+- Example output sync is now enforced by test.
+- Plan/gap docs still need periodic refresh whenever feature registry semantics change.
 
 ## Current drift/risk snapshot
 
@@ -59,11 +60,11 @@ From latest align artifact:
 
 ## Next implementation focus
 
-1. Source-aligned `unknown` and `implementation_not_found` scenarios
-- Introduce fixture/rule cases that avoid synthetic-only status coverage and are traceable to documented feature inventory gaps.
+1. Extend vendor-extension fixtures outside AQoS
+- Add targeted fixtures for non-AQoS vendor-specific parameters where source evidence supports mappings.
 
-2. Vendor-extension mapping fixtures
-- Add one or more fixtures that explicitly exercise vendor parameter variants for mapped concepts and verify deterministic status transitions.
+2. Expand deterministic/reporting guardrails
+- Add lightweight checks for additional committed docs that depend on generated/reported content.
 
-3. Documentation maintenance cadence
-- Keep example report and gap matrix synchronized after each status/confidence rule change.
+3. Prepare release-level verification pass
+- Run `releasecheck` once no further milestone changes are pending.
