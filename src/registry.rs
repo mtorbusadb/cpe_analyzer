@@ -552,12 +552,6 @@ fn topology_refs() -> Vec<SourceCodeReference> {
             "device-service status",
             "Consumes runtime device-service map output.",
         ),
-        src(
-            "prisme-backend/services/customer-care-agent/src/services/map_bulk_fallback.go",
-            39,
-            "bulk fallback",
-            "Defines fallback helper with no confirmed active call path.",
-        ),
     ]
 }
 
