@@ -16,7 +16,11 @@ Default host repository decision:
 
 Codex may inspect all repositories under `prisme/` to discover feature requirements, APIs, DTOs, schemas, UI labels, fixtures, tests, and implementation logic.
 
-Codex must not modify `prisme-ui` or `tss` during Phase 0 or Phase 1 unless explicitly instructed. Cross-repository edits require a clear justification and human approval.
+Codex must not modify any files in `prisme-backend`, `prisme-ui`, or `tss`.
+
+This prohibition is strict and applies to all phases.
+
+All three PRISME repositories are read-only for this project.
 
 If repository names differ locally, Codex must first list the repositories under `prisme/`, identify the likely backend/service repository, and document the final host-repository choice in the Phase 0 investigation report before implementing anything.
 
