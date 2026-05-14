@@ -139,3 +139,19 @@ Before committing changes, also run:
 cargo fmt --check
 git diff --check
 ```
+
+## Align Workflow
+
+To regenerate a read-only PRISME drift report against the current baseline lock:
+
+```bash
+python3 scripts/align.py
+```
+
+Optional root override:
+
+```bash
+python3 scripts/align.py --prisme-root /path/to/prisme
+```
+
+This writes `docs/offline-analyzer/align-drift-report.md` and does not modify PRISME repositories.
