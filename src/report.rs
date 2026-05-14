@@ -202,7 +202,7 @@ fn color_status(status: SupportStatus, color_mode: ColorMode) -> String {
         SupportStatus::Supported => "32",
         SupportStatus::Partial => "33",
         SupportStatus::Unsupported => "31",
-        SupportStatus::Unknown => "90",
+        SupportStatus::Unknown => "36",
         SupportStatus::ImplementationNotFound => "35",
     };
     format!("\u{1b}[{code}m{plain}\u{1b}[0m")
@@ -231,5 +231,29 @@ mod tests {
         assert!(!text.contains("tss: unknown"));
         assert!(text.contains("Missing for support"));
         assert!(!text.contains("\u{1b}["));
+    }
+
+    #[test]
+    fn status_colors_follow_contract_palette() {
+        assert_eq!(
+            color_status(SupportStatus::Supported, ColorMode::Always),
+            "\u{1b}[32msupported\u{1b}[0m"
+        );
+        assert_eq!(
+            color_status(SupportStatus::Partial, ColorMode::Always),
+            "\u{1b}[33mpartial\u{1b}[0m"
+        );
+        assert_eq!(
+            color_status(SupportStatus::Unsupported, ColorMode::Always),
+            "\u{1b}[31munsupported\u{1b}[0m"
+        );
+        assert_eq!(
+            color_status(SupportStatus::Unknown, ColorMode::Always),
+            "\u{1b}[36munknown\u{1b}[0m"
+        );
+        assert_eq!(
+            color_status(SupportStatus::ImplementationNotFound, ColorMode::Always),
+            "\u{1b}[35mimplementation_not_found\u{1b}[0m"
+        );
     }
 }
