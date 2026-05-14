@@ -545,6 +545,53 @@ fn vendor_extension_fixture_drives_aqos_features_to_partial() {
     }
 }
 
+#[test]
+fn source_aligned_feature_can_emit_unknown_when_requirements_are_unavailable() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/basic-supported.json",
+    ))
+    .unwrap();
+    let mut feature = phase1_features()
+        .into_iter()
+        .find(|f| f.feature_id == "customerCare.topologyMap")
+        .unwrap();
+    feature.requirements.clear();
+    feature.implementation_found = true;
+
+    let report = evaluate_definitions(&snapshot, &[feature]);
+    assert_eq!(report.features.len(), 1);
+    assert_eq!(
+        report.features[0].feature_id,
+        "customerCare.topologyMap".to_string()
+    );
+    assert_eq!(report.features[0].support, SupportStatus::Unknown);
+}
+
+#[test]
+fn source_aligned_feature_can_emit_implementation_not_found_when_logic_is_missing() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/basic-supported.json",
+    ))
+    .unwrap();
+    let mut feature = phase1_features()
+        .into_iter()
+        .find(|f| f.feature_id == "customerCare.scoreDrilldown")
+        .unwrap();
+    feature.requirements.clear();
+    feature.implementation_found = false;
+
+    let report = evaluate_definitions(&snapshot, &[feature]);
+    assert_eq!(report.features.len(), 1);
+    assert_eq!(
+        report.features[0].feature_id,
+        "customerCare.scoreDrilldown".to_string()
+    );
+    assert_eq!(
+        report.features[0].support,
+        SupportStatus::ImplementationNotFound
+    );
+}
+
 fn assert_sorted_missing(missing: &[cpe_analyzer::model::MissingRequirement], feature_id: &str) {
     let ids: Vec<_> = missing.iter().map(|item| item.rule_id.as_str()).collect();
     let mut sorted = ids.clone();
