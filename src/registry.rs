@@ -247,6 +247,7 @@ pub fn phase1_features() -> Vec<FeatureDefinition> {
     ]
 }
 
+#[allow(clippy::too_many_arguments)]
 fn feature(
     id: &'static str,
     name: &'static str,

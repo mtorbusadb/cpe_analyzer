@@ -11,7 +11,7 @@ fn example_output_report_is_in_sync_with_cli() {
 
     let bin = std::env::var("CARGO_BIN_EXE_cpe_analyzer")
         .unwrap_or_else(|_| "target/debug/cpe-analyzer".to_string());
-    let status = Command::new(&bin)
+    let status = Command::new(bin)
         .args([
             "--input",
             "docs/offline-analyzer/examples/input-basic.json",

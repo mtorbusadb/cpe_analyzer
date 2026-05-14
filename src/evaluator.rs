@@ -119,13 +119,12 @@ fn assess_feature(snapshot: &Snapshot, feature: &FeatureDefinition) -> FeatureAs
     missing_optional.sort_by(|a, b| a.rule_id.cmp(&b.rule_id));
     missing_control.sort_by(|a, b| a.rule_id.cmp(&b.rule_id));
     missing_diagnostic.sort_by(|a, b| a.rule_id.cmp(&b.rule_id));
+    let blocks_support = !missing_mandatory.is_empty()
+        || (feature.control_required_for_support && !missing_control.is_empty())
+        || (feature.diagnostic_required_for_support && !missing_diagnostic.is_empty());
     let support = if !feature.implementation_found {
         SupportStatus::ImplementationNotFound
-    } else if !missing_mandatory.is_empty() {
-        SupportStatus::Unsupported
-    } else if feature.control_required_for_support && !missing_control.is_empty() {
-        SupportStatus::Unsupported
-    } else if feature.diagnostic_required_for_support && !missing_diagnostic.is_empty() {
+    } else if blocks_support {
         SupportStatus::Unsupported
     } else if feature.runtime_validation_required
         || !missing_optional.is_empty()

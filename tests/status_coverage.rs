@@ -645,7 +645,11 @@ fn mixed_edge_composite_fixture_has_stable_cross_domain_status_splits() {
         SupportStatus::Partial
     );
     assert_eq!(
-        report.summary.get("unsupportedFeatures").copied().unwrap_or(0),
+        report
+            .summary
+            .get("unsupportedFeatures")
+            .copied()
+            .unwrap_or(0),
         8
     );
 }
