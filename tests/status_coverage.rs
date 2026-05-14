@@ -500,6 +500,31 @@ fn p2_features_can_be_degraded_partial_with_runtime_heavy_evidence() {
     }
 }
 
+#[test]
+fn tr098_rich_snapshot_drives_all_p0_features_to_partial() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/tr098-p0-rich-partial.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    assert_eq!(snapshot.detected_data_model, "TR-098");
+    for feature_id in [
+        "discovery.capabilityScan",
+        "discovery.platformFeatureScan",
+        "score.cpe.overall",
+        "score.cpe.wifi",
+        "score.host.wifi",
+        "score.cpe.internet",
+        "selfHealing.remoteChannelManagement",
+    ] {
+        assert_eq!(
+            feature_status(&report, feature_id),
+            SupportStatus::Partial,
+            "{feature_id}"
+        );
+    }
+}
+
 fn assert_sorted_missing(missing: &[cpe_analyzer::model::MissingRequirement], feature_id: &str) {
     let ids: Vec<_> = missing.iter().map(|item| item.rule_id.as_str()).collect();
     let mut sorted = ids.clone();

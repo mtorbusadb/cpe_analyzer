@@ -1,0 +1,24 @@
+{
+  "Report": [
+    { "path": "device.vendor", "kind": "metadata", "value": "TR098Vendor" },
+    { "path": "device.model", "kind": "metadata", "value": "TR098Model" },
+    { "path": "device.declaredDataModel", "kind": "metadata", "value": "TR-098" },
+
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.OperatingFrequencyBand", "value": "2.4GHz", "readable": true },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.Channel", "value": 6, "readable": true, "writable": true },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.AutoChannelEnable", "value": false, "readable": true, "writable": true },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.PossibleChannels", "value": "1,6,11", "readable": true },
+
+    { "path": "InternetGatewayDevice.IPPingDiagnostics.DiagnosticsState", "kind": "history", "value": "Complete" },
+    { "path": "InternetGatewayDevice.DownloadDiagnostics.DiagnosticsState", "kind": "history", "value": "Complete" },
+    { "path": "InternetGatewayDevice.UploadDiagnostics.DiagnosticsState", "kind": "history", "value": "Complete" },
+
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.Stats.Noise", "kind": "history", "value": -92 },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.ChannelUtilization", "kind": "history", "value": 35 },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.AssociatedDevice.1.SignalStrength", "kind": "history", "value": -54 },
+    { "path": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.AssociatedDevice.1.LastDataTransmitRate", "kind": "history", "value": 144 },
+
+    { "path": "score.cpe.wifi", "kind": "score", "value": 72 },
+    { "path": "score.cpe.internet", "kind": "score", "value": 68 }
+  ]
+}
