@@ -40,17 +40,17 @@ Status of target features by implementation presence:
 
 Although all target features are present in registry and recent milestones improved quality, remaining gap categories are:
 
-1. Vendor-extension breadth beyond AQoS
-- Vendor-extension coverage now exists for AQoS paths.
-- Additional non-AQoS vendor extension fixtures are still limited.
-
-2. Ongoing evidence drift monitoring
+1. Ongoing evidence drift monitoring
 - `align` smoke and deterministic-output coverage now exist, and registry reference integrity is clean.
 - Continue periodic read-only `align` runs to detect commit drift against the locked baseline.
 
-3. Documentation drift risk as rules evolve
+2. Documentation drift risk as rules evolve
 - Example output sync is now enforced by test.
 - Plan/gap docs still need periodic refresh whenever feature registry semantics change.
+
+3. Coverage depth for mixed-edge status transitions
+- Core status coverage is broad, including source-aligned `unknown` and `implementation_not_found`.
+- Remaining opportunity is richer mixed-edge fixtures that exercise multiple degraded branches in one snapshot while preserving deterministic ordering.
 
 ## Current drift/risk snapshot
 
@@ -60,11 +60,11 @@ From latest align artifact:
 
 ## Next implementation focus
 
-1. Extend vendor-extension fixtures outside AQoS
-- Add targeted fixtures for non-AQoS vendor-specific parameters where source evidence supports mappings.
-
-2. Expand deterministic/reporting guardrails
+1. Expand deterministic/reporting guardrails
 - Add lightweight checks for additional committed docs that depend on generated/reported content.
+
+2. Mixed-edge fixture hardening
+- Add one composite fixture that simultaneously drives partial/unsupported splits across score, diagnostics, and customer-care features.
 
 3. Prepare release-level verification pass
 - Run `releasecheck` once no further milestone changes are pending.
