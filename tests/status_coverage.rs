@@ -377,6 +377,62 @@ fn p0_feature_statuses_on_minimal_fixture_are_unsupported() {
     }
 }
 
+#[test]
+fn p1_feature_statuses_on_basic_supported_fixture_are_stable() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/basic-supported.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    assert_eq!(
+        feature_status(&report, "discovery.rediscovery"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "selfHealing.aqosDynamicPrioritization"),
+        SupportStatus::Unsupported
+    );
+    assert_eq!(
+        feature_status(&report, "selfHealing.aqosAirtimeFairnessTuning"),
+        SupportStatus::Unsupported
+    );
+    assert_eq!(
+        feature_status(&report, "selfHealing.aqosRtsCtsThresholdTuning"),
+        SupportStatus::Unsupported
+    );
+    assert_eq!(
+        feature_status(&report, "customerCare.wifiSettings"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "diagnostics.speedtest"),
+        SupportStatus::Unsupported
+    );
+}
+
+#[test]
+fn p1_feature_statuses_on_minimal_fixture_are_unsupported() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/missing-mandatory.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+    for feature_id in [
+        "discovery.rediscovery",
+        "selfHealing.aqosDynamicPrioritization",
+        "selfHealing.aqosAirtimeFairnessTuning",
+        "selfHealing.aqosRtsCtsThresholdTuning",
+        "customerCare.wifiSettings",
+        "diagnostics.speedtest",
+    ] {
+        assert_eq!(
+            feature_status(&report, feature_id),
+            SupportStatus::Unsupported,
+            "{feature_id}"
+        );
+    }
+}
+
 fn assert_sorted_missing(missing: &[cpe_analyzer::model::MissingRequirement], feature_id: &str) {
     let ids: Vec<_> = missing.iter().map(|item| item.rule_id.as_str()).collect();
     let mut sorted = ids.clone();
