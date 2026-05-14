@@ -8,7 +8,11 @@ import subprocess
 
 
 def run_git(repo: pathlib.Path, args: list[str]) -> str:
-    return subprocess.check_output(["git", "-C", str(repo), *args], text=True).strip()
+    return subprocess.check_output(
+        ["git", "-C", str(repo), *args],
+        text=True,
+        stderr=subprocess.DEVNULL,
+    ).strip()
 
 
 def safe_git(repo: pathlib.Path, args: list[str]) -> str:
