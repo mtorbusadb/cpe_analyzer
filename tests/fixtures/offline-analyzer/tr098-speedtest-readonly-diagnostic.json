@@ -1,0 +1,10 @@
+{
+  "Report": [
+    { "path": "device.vendor", "kind": "metadata", "value": "TR098Vendor" },
+    { "path": "device.model", "kind": "metadata", "value": "TR098Model" },
+    { "path": "device.declaredDataModel", "kind": "metadata", "value": "TR-098" },
+    { "path": "diagnostics.speedtest.dispatch", "kind": "diagnostic", "value": "available", "available": true, "commandable": false },
+    { "path": "InternetGatewayDevice.DownloadDiagnostics.DiagnosticsState", "kind": "diagnostic", "value": "None", "available": true, "commandable": false },
+    { "path": "InternetGatewayDevice.UploadDiagnostics.DiagnosticsState", "kind": "diagnostic", "value": "None", "available": true, "commandable": false }
+  ]
+}
