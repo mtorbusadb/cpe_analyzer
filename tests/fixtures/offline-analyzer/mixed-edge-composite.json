@@ -1,0 +1,25 @@
+{
+  "Report": [
+    { "path": "device.vendor", "kind": "metadata", "value": "EdgeVendor" },
+    { "path": "device.model", "kind": "metadata", "value": "EdgeModel" },
+    { "path": "device.declaredDataModel", "kind": "metadata", "value": "TR-181" },
+
+    { "path": "Device.WiFi.SSID.1.SSID", "value": "EdgeSSID", "readable": true, "writable": true },
+    { "path": "Device.WiFi.AccessPoint.1.Enable", "value": true, "readable": true },
+    { "path": "Device.WiFi.AccessPoint.1.SSIDReference", "value": "Device.WiFi.SSID.1.", "readable": true },
+    { "path": "Device.WiFi.AccessPoint.1.Security.ModeEnabled", "value": "WPA2-Personal", "readable": true },
+    { "path": "Device.WiFi.AccessPoint.1.Security.KeyPassphrase", "value": "secret123", "readable": true, "writable": true },
+
+    { "path": "Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState", "kind": "diagnostic", "value": "None", "available": true, "commandable": true },
+    { "path": "Device.IP.Diagnostics.UploadDiagnostics.DiagnosticsState", "kind": "diagnostic", "value": "None", "available": true, "commandable": true },
+
+    { "path": "customerCare.topology.deviceServiceMap", "kind": "derivedMetric", "value": { "nodes": [{ "id": "gw-1" }] } },
+    { "path": "customerCare.score.device", "kind": "score", "value": 70 },
+    { "path": "scores.scores.history", "kind": "history", "value": [70, 69, 68], "window": "24h" },
+    { "path": "noc.populationScores.scoreSeries", "kind": "history", "value": [66, 67, 69], "window": "24h" },
+
+    { "path": "scores.metrics.history.device.wan.download", "kind": "history", "value": [140.2, 137.6, 142.0] },
+    { "path": "scores.metrics.history.device.wan.upload", "kind": "history", "value": [30.5, 29.9, 31.2] },
+    { "path": "scores.metrics.history.device.wan.ping", "kind": "history", "value": [12.3, 13.1, 11.9] }
+  ]
+}

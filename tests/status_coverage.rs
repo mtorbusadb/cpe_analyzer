@@ -612,6 +612,44 @@ fn vendor_non_aqos_fixture_drives_customer_and_noc_features_to_partial() {
     }
 }
 
+#[test]
+fn mixed_edge_composite_fixture_has_stable_cross_domain_status_splits() {
+    let snapshot = load_snapshot(Path::new(
+        "tests/fixtures/offline-analyzer/mixed-edge-composite.json",
+    ))
+    .unwrap();
+    let report = evaluate(&snapshot);
+
+    assert_eq!(
+        feature_status(&report, "customerCare.wifiSettings"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "diagnostics.speedtest"),
+        SupportStatus::Unsupported
+    );
+    assert_eq!(
+        feature_status(&report, "customerCare.topologyMap"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "customerCare.scoreDrilldown"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "noc.populationScores"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        feature_status(&report, "score.cpe.internet"),
+        SupportStatus::Partial
+    );
+    assert_eq!(
+        report.summary.get("unsupportedFeatures").copied().unwrap_or(0),
+        8
+    );
+}
+
 fn assert_sorted_missing(missing: &[cpe_analyzer::model::MissingRequirement], feature_id: &str) {
     let ids: Vec<_> = missing.iter().map(|item| item.rule_id.as_str()).collect();
     let mut sorted = ids.clone();
