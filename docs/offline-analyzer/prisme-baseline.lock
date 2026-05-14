@@ -1,11 +1,11 @@
 {
   "prisme_backend": {
-    "commit_sha": "unknown"
+    "commit_sha": "d4821d7d2c5e24cd13c55fc109831a9fc3486529"
   },
   "prisme_ui": {
-    "commit_sha": "unknown"
+    "commit_sha": "32d3cc32bf7f6cdbc1a9355ee296d3323d9ccd07"
   },
   "tss": {
-    "commit_sha": "unknown"
+    "commit_sha": "6abab384e6f4b6bbffbecb8518e5a92beb236a25"
   }
 }

@@ -226,6 +226,9 @@ mod tests {
         assert!(text.contains("reportFormatVersion: 1"));
         assert!(text.contains("PRISME Baseline Compatibility"));
         assert!(text.contains("prisme-backend:"));
+        assert!(!text.contains("prisme-backend: unknown"));
+        assert!(!text.contains("prisme-ui: unknown"));
+        assert!(!text.contains("tss: unknown"));
         assert!(text.contains("Missing for support"));
         assert!(!text.contains("\u{1b}["));
     }
