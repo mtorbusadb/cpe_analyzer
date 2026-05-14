@@ -1,0 +1,21 @@
+{
+  "Report": [
+    { "path": "device.vendor", "kind": "metadata", "value": "VendorX" },
+    { "path": "device.model", "kind": "metadata", "value": "ModelY" },
+    { "path": "device.declaredDataModel", "kind": "metadata", "value": "TR-181" },
+
+    { "path": "selfHealing.qos.associatedDevices", "kind": "value", "value": { "count": 4 } },
+    { "path": "selfHealing.qos.scoreTelemetry", "kind": "history", "value": [65, 62, 60] },
+    { "path": "selfHealing.qos.hostTrafficTelemetry", "kind": "history", "value": [1200, 980, 870] },
+    { "path": "selfHealing.qos.collisionMetrics", "kind": "history", "value": [0.08, 0.07, 0.05] },
+
+    { "path": "selfHealing.qos.priorityControl", "writable": true, "value": true },
+    { "path": "selfHealing.qos.atfControl", "writable": true, "value": true },
+    { "path": "selfHealing.qos.rtsCtsControl", "writable": true, "value": true },
+
+    { "path": "Device.WiFi.SSID.1.X_ADB_AirTimeFairnessEnable", "readable": true, "writable": true, "value": true },
+    { "path": "Device.WiFi.AccessPoint.1.AssociatedDevice.1.X_ADB_AirTimeFairness", "readable": true, "writable": true, "value": 20 },
+    { "path": "Device.WiFi.Radio.1.X_ADB_RTSCTS_Threshold", "readable": true, "writable": true, "value": 1024 },
+    { "path": "Device.WiFi.Radio.1.X_ADB_RetryLimit", "readable": true, "writable": true, "value": 7 }
+  ]
+}
