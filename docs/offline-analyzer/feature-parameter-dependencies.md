@@ -36,6 +36,11 @@ Milestones 2-4 map Discovery Program, score/KPI, self-healing, diagnostics, and 
 
 ## Dependency Matrix
 
+Implementation note: the analyzer is being moved from direct feature-to-path
+matching toward concept-bound evaluation. Path inventories and concept bindings
+must remain source-derived and platform-agnostic; external documents are review
+context only.
+
 | featureId | featureName | dependencyStatus | mandatoryConcepts | optionalConcepts | controlConcepts | diagnosticConcepts | inputEvidenceSections | runtimeLimitations | sourceEvidence | mappingMilestone |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `discovery.capabilityScan` | Discovery Program capability scan | `mapped` | `discovery.dataModel.family`, `discovery.capability.requirementType`, `discovery.capability.propertyPresence` | `discovery.capability.propertySet`, `discovery.capability.moduleStatus`, `discovery.capability.suiteScore` | none | `discovery.comm.qoeAgent.diagnosticCapability` only where QoE-agent suite is selected | `Report[]` parameter/object entries plus metadata declaring TR-181 or TR-098 | Static JSON cannot execute live probes or prove parameter runtime quality. | `prisme-backend/services/discovery-program/src/device_processor.py:111`, `prisme-backend/services/discovery-program/src/disc_prog_capability_types.py:8`, `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:259`, `prisme-backend/services/discovery-program/src/disc_prog_capability_scanner.py:327` | Milestone 2 |

@@ -1,4 +1,6 @@
 pub mod baseline;
+pub mod concept_binding;
+pub mod concepts;
 pub mod evaluator;
 pub mod input;
 pub mod model;

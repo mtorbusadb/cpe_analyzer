@@ -27,6 +27,10 @@ Each concept entry includes:
 - source-code evidence
 - notes
 
+Implementation note: current analyzer code now includes the first canonical
+concept graph and source-inventory binder. This is intentionally a small seed
+set for platform-agnostic concepts; it is not a final path mapping table.
+
 Concept types:
 
 - `staticMetadata`

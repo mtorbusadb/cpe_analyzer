@@ -169,6 +169,23 @@ This layer is not allowed to import mappings from external documents. External
 documents can only be used by reviewers to sanity-check whether the source-derived
 inventory is plausible.
 
+## Canonical Concept Graph
+
+Feature evaluation should move through canonical capability concepts instead of
+direct feature-to-path matching.
+
+Initial responsibilities:
+
+- define stable concept IDs for platform-agnostic capabilities,
+- bind one concept to multiple source-backed path patterns,
+- distinguish native, alternate, and derived evidence roles,
+- preserve source references from inventory entries through concept evidence,
+- keep concept ordering deterministic.
+
+Concepts must stay generic. They may describe Wi-Fi, host, WAN, diagnostic, score,
+or control capabilities, but they must not encode vendor, model, customer, or
+platform-specific branches.
+
 ## Evaluation Rules
 
 Evaluate each feature by matching mandatory, optional, control, diagnostic, derived, and runtime-only requirements against the normalized snapshot.
