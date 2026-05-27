@@ -150,6 +150,25 @@ Registry entries must include source-code evidence copied from the mapped docs.
 
 Phase 1 registry should be coded directly in Rust constants or simple constructors. Do not introduce a custom DSL or external config format yet.
 
+## Source Inventory Layer
+
+The analyzer must include a source-derived inventory layer before feature
+evaluation becomes authoritative.
+
+Initial responsibilities:
+
+- scan the local PRISME repositories (`prisme-backend`, `prisme-ui`, `tss`) in
+  read-only mode,
+- extract `Device.*` and `InternetGatewayDevice.*` references,
+- normalize numeric instances to `{i}`,
+- classify paths as exact or pattern after normalization,
+- classify paths as TR-181, TR-098, vendor extension, non-standard, or unknown,
+- preserve deterministic source references.
+
+This layer is not allowed to import mappings from external documents. External
+documents can only be used by reviewers to sanity-check whether the source-derived
+inventory is plausible.
+
 ## Evaluation Rules
 
 Evaluate each feature by matching mandatory, optional, control, diagnostic, derived, and runtime-only requirements against the normalized snapshot.

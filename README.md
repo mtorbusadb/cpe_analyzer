@@ -4,9 +4,16 @@ This project analyzes a static CPE data model snapshot against PRISME feature re
 
 The analyzer runs offline. It does not connect to a CPE, ACS, USP controller, BulkData ingestion path, PRISME deployment, production database, or message broker.
 
+The analyzer derives PRISME-specific evidence from the local source repositories
+(`prisme-backend`, `prisme-ui`, and `tss`). External documents may be used for
+manual review context only; they are not analyzer inputs and must not be encoded
+as mapping truth.
+
 ## Current Scope
 
 The analyzer currently supports JSON input and produces a structured plain-text report.
+It also contains the first source-inventory layer used to mine PRISME repositories
+for referenced data model paths in a deterministic, platform-agnostic form.
 
 The report answers:
 
@@ -161,3 +168,19 @@ python3 scripts/align.py --generated-at "2026-05-14 00:00:00 UTC"
 ```
 
 This writes `docs/offline-analyzer/align-drift-report.md` and does not modify PRISME repositories.
+
+## Source Inventory Layer
+
+The implementation includes a platform-agnostic source inventory module that can
+scan local PRISME repositories and normalize referenced `Device.*` and
+`InternetGatewayDevice.*` paths.
+
+Inventory entries preserve:
+
+- normalized path
+- exact or pattern classification
+- standard class (`TR-181`, `TR-098`, vendor extension, non-standard, unknown)
+- source references
+
+This layer is intentionally internal for now. It is the foundation for later
+concept binding and rule execution, not a replacement for those stages.
